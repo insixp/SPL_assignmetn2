@@ -21,4 +21,17 @@ public class Data {
         this.processed = 0;
         this.size = size;
     }
+
+    public Type getType(){ return this.type; }
+    public int getProcessed() { return this.processed; }
+    public int getSize() { return this.size; }
+    public int getTicksToProcess(){
+        if(this.type == Type.Images)
+            return 4;
+        if(this.type == Type.Text)
+            return 2;
+        if(this.type == Type.Tabular)
+            return 1;
+        return -1;
+    }
 }

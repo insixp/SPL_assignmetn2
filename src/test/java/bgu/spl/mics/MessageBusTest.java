@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class MessageBusTest extends TestCase {
 
-    private MessageBusImpl msgBus;
+    private MessageBus msgBus;
 
     private class testMicroService extends MicroService{
 

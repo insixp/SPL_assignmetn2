@@ -21,4 +21,18 @@ public class Model {
     private Status status;
     private Result result;
 
+    public Model(String name, Data data, Student student){
+        this.name = name;
+        this.data = data;
+        this.student = student;
+        this.status = Status.PreTrained;
+        this.result = Result.None;
+    }
+
+    public String getName(){ return this.name; }
+    public Data getData(){ return this.data; }
+    public Student getStudent(){ return this.student; }
+    public Status getStatus(){ return this.status; }
+    public Result getResult(){ return this.result; }
+
 }
