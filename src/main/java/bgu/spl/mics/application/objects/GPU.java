@@ -13,16 +13,15 @@ public class GPU {
      */
     enum Type {RTX3090, RTX2080, GTX1080}
 
-    private final int BATCH_SIZE = 1000;
+    public final int BATCH_SIZE = 1000;
     private final Type type;
+    private final int vmemSize;
     private Model model;
     private final int gpuId;
     private int nextBatch;
     private boolean active;
-    private final int vmemSize;
     private int vmemOccupied;
     private int ticks_processed;
-    private int batchesSent;
 
     public GPU(int gpuId, Type type){
         this.gpuId = gpuId;
@@ -32,7 +31,6 @@ public class GPU {
         this.model = null;
         this.vmemOccupied = 0;
         this.ticks_processed = 0;
-        this.batchesSent = 0;
         if(type == Type.RTX3090)
             this.vmemSize = 32;
         else if(type == Type.RTX2080)
@@ -43,47 +41,105 @@ public class GPU {
             this.vmemSize = 0;
     }
 
-    //  @INV: 0 <= getTicksProcessed() <= 4
+    /**
+     * @Invariant: 0 <= this.getTicksProcessed <= 4
+     * @Invariant: this.getVmemSize() == 8 || this.getVmemSize() == 16 || this.getVmemSize() == 32
+     * @Invariant: 0 <= this.getVmemOccupied <= 32
+     * @Invariant: 0 <= this.getVmemFree() <= 32
+     */
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Returns the size of the virtual memory the GPU has.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public int getVmemSize(){ return this.vmemSize; }
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Return the amount of occupied virtual memory the GPU has.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public int getVmemOccupied(){ return this.vmemOccupied; }
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Return the amount of free virtual memory the GPU has.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public int getVmemFree(){ return this.getVmemSize() - this.getVmemOccupied(); }
 
-    //  @PRE: none
-    //  @POST: trivial
-    public int getBatchAmount(){ return this.model.getData().getSize()/BATCH_SIZE; }
+    /**
+     *  Return the total amount of Batches the current model has.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
+    public int getTotalBatch(){ return this.model.getData().getSize()/BATCH_SIZE; }
 
-    //  @PRE: none
-    //  @POST: trivial
-    public int getBatchSent(){ return this.batchesSent; }
-
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Return the amount of batches that were processed (CPU process only)
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public int getBatchProcessed(){ return this.model.getData().getProcessed(); }
 
-    //  @PRE: nextBatch + BATCH_SIZE <= model.getData().getSize()
-    //  @POST: nextBatch += BATCH_SIZE
+    /**
+     *  Return the current Model.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
+    public Model getModel(){ return this.model; }
+
+    /**
+     *  Increase the Data Batch pointer
+     *  @PRE: nextBatch + BATCH_SIZE < model.getData().getSize()
+     *  @POST: nextBatch += BATCH_SIZE
+     **/
     private void incDataBatch(){
-        if(this.nextBatch + this.BATCH_SIZE <= this.model.getData().getSize())
+        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize())
             this.nextBatch += this.BATCH_SIZE;
     }
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Increase virtual memory occupied
+     *  @PRE: none
+     *  @POST: trivial
+     **/
+    private void incVmemOccupied(){ this.vmemOccupied++; }
+
+    /**
+     *  Decrease virtual memory occupied
+     *  @PRE: none
+     *  @POST: trivial
+     **/
+    private void decVmemOccupied(){ this.vmemOccupied--; }
+
+    /**
+     *  Return new data batch with the current pointer location
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     private DataBatch getNextDataBatch(){
         return new DataBatch(this.model.getData(), this.nextBatch, this.gpuId);
     }
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Return the next data batch to be processed, increase the pointer to the next batch
+     *  update all the necessary statistics.
+     *  @PRE: nextBatch + BATCH_SIZE < model.getData().getSize()
+     *  @POST: nextBatch = @pre: nextBatch + BATCH_SIZE
+     **/
+    public DataBatch popNextDataBatch(){
+        DataBatch db = this.getNextDataBatch();
+        this.incDataBatch();
+        return db;
+    }
+
+    /**
+     *  Return the amount of ticks needed to train model.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     private int getTicksToProcess(){
         if(this.type == Type.RTX3090)
             return 1;
@@ -94,16 +150,11 @@ public class GPU {
         return -1;
     }
 
-    //  @PRE: @PRE(incDataBatch)
-    //  @POST: @POST(incDataBatch)
-    public DataBatch popNextDataBatch(){
-        DataBatch db = this.getNextDataBatch();
-        this.incDataBatch();
-        return db;
-    }
-
-    //  @PRE: this.model = null
-    //  @POST: this.model = model
+    /**
+     *  Sets the current model of the GPU.
+     *  @PRE: this.active = false
+     *  @POST: this.model = model
+     **/
     public void setModel(Model model) {
         if(!active) {
             this.model = model;
@@ -112,26 +163,44 @@ public class GPU {
         }
     }
 
-    //  @PRE:
-    //  @POST:
+    /**
+     *  Set the processed data from the CPU.
+     *  @PRE: this.getVmemOccupied > 0
+     *  @POST: Vmem.contains(db_in)
+     **/
     public void setProcessedData(DataBatch db_in){}
 
-    //  @PRE: none
-    //  @POST: trivial
+    /**
+     *  Get amount of tick processed ON THE CURRENT DATA BATCH.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public int getTicksProcessed(){ return this.ticks_processed; }
 
-    //  @PRE: none
-    //  @POST: (ticks_processed+1)%(getTicksToProcess(this.type))
+    /**
+     *  Increase tick
+     *  @PRE: none
+     *  @POST: (ticks_processed+1)%(getTicksToProcess(this.type))
+     **/
     private void incTick(){
         this.ticks_processed = (this.ticks_processed+1)%(getTicksToProcess());
     }
 
-    //  @PRE:
-    //  @POST:
+    /**
+     *  Process the next Tick, train the model 1 tick and check to see if finished. if so,
+     *  get another batch from the vmem and start working on it.
+     *  @PRE: none
+     *  @POST: (ticks_processed+1)%(getTicksToProcess(this.type))
+     *  @POST: this.getVmemOccupied() <= @pre:this.getVmemOcuupied()
+     *  @POST: this.getVmemFree() >= @pre:this.getVmemFree()
+     **/
     public void processNextTick(){}
 
-    //  @PRE:
-    //  @POST:
+    /**
+     *  Testing a model.
+     *  @PRE: none
+     *  @POST: trivial
+     **/
     public Model.Result testModel(Model model_in){
         Random rnd = new Random();
         int rand = rnd.nextInt(100);

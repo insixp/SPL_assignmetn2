@@ -22,11 +22,11 @@ public class CPUTest extends TestCase {
         Data data = new Data(Data.Type.Images, 20000);
         DataBatch db = new DataBatch(data, 3000, 2);
         Collection<DataBatch> db_collection = this.cpu.getDataBatches();
-        assertEquals(db_collection.contains(db), false);
+        assertEquals(false, db_collection.contains(db));
         this.cpu.addDataBatch(db);
         db_collection = this.cpu.getDataBatches();
-        assertEquals(db_collection.size(), 1);
-        assertEquals(db_collection.contains(db), true);
+        assertEquals(1, db_collection.size());
+        assertEquals(true, db_collection.contains(db));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class CPUTest extends TestCase {
         //  Text
         for(int i = 0; i < 2;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
+            if(i == 1)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
@@ -81,23 +81,20 @@ public class CPUTest extends TestCase {
         this.cpu.addDataBatch(db);
         for(int i = 0; i < 1;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
-                assertNotNull(processedDB);
-            else
-                assertNull(processedDB);
+            assertNotNull(processedDB);
         }
     }
 
     @Test
     public void test16CoresImage(){
-        this.cpu = new CPU(0, 32);
+        this.cpu = new CPU(0, 16);
         Data data = new Data(Data.Type.Images, 20000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cpu.addDataBatch(db);
         //  Image
-        for(int i = 0; i < 4*2;i++){
+        for(int i = 0; i < 8;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
+            if(i == 7)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
@@ -106,7 +103,7 @@ public class CPUTest extends TestCase {
         db = new DataBatch(data, 2000, 5);
         this.cpu.addDataBatch(db);
         //  Text
-        for(int i = 0; i < 2*2;i++){
+        for(int i = 0; i < 4;i++){
             DataBatch processedDB = this.cpu.processNextTick();
             if(i == 3)
                 assertNotNull(processedDB);
@@ -117,9 +114,9 @@ public class CPUTest extends TestCase {
         data = new Data(Data.Type.Tabular, 5000);
         db = new DataBatch(data, 2000, 5);
         this.cpu.addDataBatch(db);
-        for(int i = 0; i < 1*2;i++){
+        for(int i = 0; i < 2;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
+            if(i == 1)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
@@ -128,14 +125,14 @@ public class CPUTest extends TestCase {
 
     @Test
     public void test8CoresImage(){
-        this.cpu = new CPU(0, 32);
+        this.cpu = new CPU(0, 8);
         Data data = new Data(Data.Type.Images, 20000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cpu.addDataBatch(db);
         //  Image
-        for(int i = 0; i < 4*4;i++){
+        for(int i = 0; i < 16;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
+            if(i == 15)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
@@ -144,9 +141,9 @@ public class CPUTest extends TestCase {
         db = new DataBatch(data, 2000, 5);
         this.cpu.addDataBatch(db);
         //  Text
-        for(int i = 0; i < 2*4;i++){
+        for(int i = 0; i < 8;i++){
             DataBatch processedDB = this.cpu.processNextTick();
-            if(i == 3)
+            if(i == 7)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
@@ -155,7 +152,7 @@ public class CPUTest extends TestCase {
         data = new Data(Data.Type.Tabular, 5000);
         db = new DataBatch(data, 2000, 5);
         this.cpu.addDataBatch(db);
-        for(int i = 0; i < 1*4;i++){
+        for(int i = 0; i < 4;i++){
             DataBatch processedDB = this.cpu.processNextTick();
             if(i == 3)
                 assertNotNull(processedDB);
@@ -169,12 +166,29 @@ public class CPUTest extends TestCase {
         assertEquals(this.cpu.getId(), 98);
     }
 
+    @Test
+    public void testGetCores(){
+        this.cpu = new CPU(98, 24);
+        assertEquals(24, this.cpu.getCores());
+    }
+
+    @Test
+    public void testGetActive(){
+        this.cpu = new CPU(98, 24);
+        assertEquals(false, this.cpu.getActive());
+        this.cpu.addDataBatch(new DataBatch(new Data(Data.Type.Images, 20000), 5000, 3));
+        assertEquals(true, this.cpu.getActive());
+    }
+
     public void testGetTicksProcessed() {
         this.cpu = new CPU(95, 23);
+        Data data = new Data(Data.Type.Images, 20000);
+        DataBatch db = new DataBatch(data, 3000, 2);
+        this.cpu.addDataBatch(db);
         assertEquals(this.cpu.getTicksProcessed(), 0);
         for(int i = 1; i < 100; i++){
             this.cpu.processNextTick();
-            assertEquals(this.cpu.getTicksProcessed(), i);
+            assertEquals(this.cpu.getTicksProcessed(), i%(data.getTicksToProcess()));
         }
     }
 }

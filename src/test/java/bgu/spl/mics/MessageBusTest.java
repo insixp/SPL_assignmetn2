@@ -49,7 +49,7 @@ public class MessageBusTest extends TestCase {
         this.msgBus.sendEvent(event);
         try{
             Message msg = this.msgBus.awaitMessage(testMS);
-            assertEquals(msg, event);
+            assertEquals(event, msg);
         } catch (InterruptedException e) { assertEquals(true, false);}
         this.msgBus.unregister(testMS);
     }
@@ -67,7 +67,7 @@ public class MessageBusTest extends TestCase {
         this.msgBus.sendBroadcast(broadcast);
         try{
             Message msg = this.msgBus.awaitMessage(testMS);
-            assertEquals(msg, broadcast);
+            assertEquals(broadcast, msg);
         } catch (InterruptedException e) { assertEquals(true, false);}
         this.msgBus.unregister(testMS);
     }
@@ -90,15 +90,15 @@ public class MessageBusTest extends TestCase {
         Future<String> future2 = this.msgBus.sendEvent(eventMSG2);
         assertNotNull(future1);
         assertNotNull(future2);
-        assertEquals(future1.isDone(), false);
-        assertEquals(future2.isDone(), false);
+        assertEquals(false, future1.isDone());
+        assertEquals(false, future2.isDone());
         String result1 = "String 1";
         String result2 = "String 2";
         this.msgBus.complete(eventMSG, result1);
         this.msgBus.complete(eventMSG2, result2);
-        assertEquals(future1.isDone(), true);
-        assertEquals(future2.isDone(), true);
-        assertEquals(future1.get(), result1);
-        assertEquals(future2.get(), result2);
+        assertEquals(true, future1.isDone());
+        assertEquals(true, future2.isDone());
+        assertEquals(result1, future1.get());
+        assertEquals(result2, future2.get());
     }
 }

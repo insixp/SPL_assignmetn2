@@ -25,7 +25,8 @@ public class Future<T> {
      * not been completed.
      * <p>
      * @return return the result of type T if it is available, if not wait until it is available.
-     * 	       
+     * @PRE: none
+	 * @POST: trivial
      */
 	public T get() {
 		//TODO: implement this.
@@ -34,6 +35,8 @@ public class Future<T> {
 	
 	/**
      * Resolves the result of this Future object.
+	 * @PRE: none
+	 * @POST: get() == result
      */
 	public void resolve (T result) {
 		//TODO: implement this.
@@ -41,6 +44,8 @@ public class Future<T> {
 	
 	/**
      * @return true if this object has been resolved, false otherwise
+	 * @PRE: none
+	 * @POST: trivial
      */
 	public boolean isDone() {
 		//TODO: implement this.
@@ -57,6 +62,8 @@ public class Future<T> {
      * @return return the result of type T if it is available, if not, 
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
      *         elapsed, return null.
+	 * @PRE: none
+	 * @POST: trivial
      */
 	public T get(long timeout, TimeUnit unit) {
 		//TODO: implement this.

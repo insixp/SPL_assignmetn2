@@ -25,34 +25,34 @@ public class FutureTest extends TestCase {
         assertEquals(this.future.isDone(), false);
         String test_string = "This string is just a test!";
         this.future.resolve(test_string);
-        assertEquals(this.future.get(), test_string);
+        assertEquals(test_string, this.future.get());
     }
 
     @Test
     public void testResolve() {
         String test_string = "This string is just a test!";
         this.future.resolve(test_string);
-        assertEquals(this.future.get(), test_string);
+        assertEquals(test_string, this.future.get());
     }
 
     @Test
     public void testIsDone() {
-        assertEquals(this.future.isDone(), false);
+        assertEquals(false, this.future.isDone());
         this.future.resolve("");
-        assertEquals(this.future.isDone(), true);
+        assertEquals(true, this.future.isDone());
     }
 
     @Test
     public void testTimeoutGet() {
-        assertEquals(this.future.isDone(), false);
+        assertEquals(false, this.future.isDone());
         String result = this.future.get(3, TimeUnit.SECONDS);
-        assertEquals(result, null);
-        assertEquals(this.future.isDone(), false);
+        assertEquals(null, result);
+        assertEquals(false, this.future.isDone());
         String return_val = "Test of a run";
         this.future.resolve(return_val);
         result = this.future.get(3, TimeUnit.SECONDS);
-        assertEquals(result, return_val);
-        assertEquals(this.future.isDone(), true);
+        assertEquals(return_val, result);
+        assertEquals(true, this.future.isDone());
 
     }
 }
