@@ -8,6 +8,11 @@ public class MessageBusTest extends TestCase {
 
     private MessageBus msgBus;
 
+    private class testMicroService2 extends MicroService {
+        public testMicroService2(String name) { super(name); }
+        protected void initialize() {}
+    }
+
     private class testMicroService extends MicroService{
 
         public boolean ran = false;
@@ -86,19 +91,42 @@ public class MessageBusTest extends TestCase {
         testEventMSG2 eventMSG2 = new testEventMSG2();
         this.msgBus.subscribeEvent(testEventMSG.class, testMS);
         this.msgBus.subscribeEvent(testEventMSG2.class, testMS2);
+        assertEquals(0, this.msgBus.messagesWaitingForMicroService(testMS));
+        assertEquals(0, this.msgBus.messagesWaitingForMicroService(testMS2));
         Future<String> future1 = this.msgBus.sendEvent(eventMSG);
         Future<String> future2 = this.msgBus.sendEvent(eventMSG2);
+        assertEquals(1, this.msgBus.messagesWaitingForMicroService(testMS));
+        assertEquals(1, this.msgBus.messagesWaitingForMicroService(testMS2));
         assertNotNull(future1);
         assertNotNull(future2);
         assertEquals(false, future1.isDone());
         assertEquals(false, future2.isDone());
         String result1 = "String 1";
         String result2 = "String 2";
+        assertEquals(false, this.msgBus.isComplete(eventMSG));
+        assertEquals(false, this.msgBus.isComplete(eventMSG2));
         this.msgBus.complete(eventMSG, result1);
         this.msgBus.complete(eventMSG2, result2);
+        assertEquals(true, this.msgBus.isComplete(eventMSG));
+        assertEquals(true, this.msgBus.isComplete(eventMSG2));
         assertEquals(true, future1.isDone());
         assertEquals(true, future2.isDone());
         assertEquals(result1, future1.get());
         assertEquals(result2, future2.get());
+    }
+
+    public void testIsSubscribed() {
+        testMicroService testMS = new testMicroService("tesToro");
+        testEventMSG eventMSG = new testEventMSG();
+        this.msgBus.subscribeEvent(testEventMSG.class, testMS);
+        assertEquals(true, this.msgBus.isSubscribed(testEventMSG.class, testMS));
+        assertEquals(false, this.msgBus.isSubscribed(testBroadcastMSG.class, testMS));
+    }
+
+    public void testIsRegister() {
+        testMicroService testMS = new testMicroService("tesToro");
+        assertEquals(true, this.msgBus.isRegister(testMS));
+        testMicroService2 testMS2 = new testMicroService2("failoro");
+        assertEquals(false, this.msgBus.isRegister(testMS2));
     }
 }

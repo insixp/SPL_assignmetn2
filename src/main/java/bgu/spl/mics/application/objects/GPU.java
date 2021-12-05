@@ -16,6 +16,7 @@ public class GPU {
     public final int BATCH_SIZE = 1000;
     private final Type type;
     private final int vmemSize;
+    private Cluster cluster;
     private Model model;
     private final int gpuId;
     private int nextBatch;
@@ -23,7 +24,7 @@ public class GPU {
     private int vmemOccupied;
     private int ticks_processed;
 
-    public GPU(int gpuId, Type type){
+    public GPU(int gpuId, Type type, Cluster cluster){
         this.gpuId = gpuId;
         this.type = type;
         this.nextBatch = 0;
@@ -31,6 +32,8 @@ public class GPU {
         this.model = null;
         this.vmemOccupied = 0;
         this.ticks_processed = 0;
+        this.cluster = cluster;
+        this.cluster.registerGPU(this.gpuId);
         if(type == Type.RTX3090)
             this.vmemSize = 32;
         else if(type == Type.RTX2080)
@@ -124,16 +127,20 @@ public class GPU {
     }
 
     /**
-     *  Return the next data batch to be processed, increase the pointer to the next batch
-     *  update all the necessary statistics.
+     *   Send the next data batch to be processed to the cluster if possible, increase the pointer
+     *   to the next batch and update all the necessary statistics.
      *  @PRE: nextBatch + BATCH_SIZE < model.getData().getSize()
      *  @POST: nextBatch = @pre: nextBatch + BATCH_SIZE
+     *  @POST: this.cluster.messagesByGPU() = @PRE: this.cluster.messagesByGPU() + 1
      **/
-    public DataBatch popNextDataBatch(){
-        DataBatch db = this.getNextDataBatch();
-        this.incDataBatch();
-        return db;
-    }
+    public void popNextDataBatch(){ }
+
+    /**
+     *  Unregister the GPU from the cluster
+     * @PRE: this.cluster.isGPURegistered(this.gpuId) == true
+     * @POST: this.cluster.isGPURegistered(this.gpuId) == false
+     */
+    public void clusterUnregister(){ this.cluster.unregisterGPU(this.gpuId);}
 
     /**
      *  Return the amount of ticks needed to train model.
@@ -164,11 +171,13 @@ public class GPU {
     }
 
     /**
-     *  Set the processed data from the CPU.
+     *  Get the processed data of the CPU from the cluster.
      *  @PRE: this.getVmemOccupied > 0
+     *  @PRE: this.cluster.messagesToGPU() > 0
      *  @POST: Vmem.contains(db_in)
+     *  @POST: this.cluster.messagesToGPU() = @PRE:this.cluster.messagesToGPU()-1
      **/
-    public void setProcessedData(DataBatch db_in){}
+    public void getProcessedData(){}
 
     /**
      *  Get amount of tick processed ON THE CURRENT DATA BATCH.

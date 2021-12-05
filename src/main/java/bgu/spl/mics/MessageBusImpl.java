@@ -55,4 +55,24 @@ public class MessageBusImpl implements MessageBus {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean isSubscribed(Class<? extends Message> type, MicroService m) {
+		return false;
+	}
+
+	@Override
+	public <T> boolean isComplete(Event<T> e) {
+		return false;
+	}
+
+	@Override
+	public boolean isRegister(MicroService m) {
+		return false;
+	}
+
+	@Override
+	public int messagesWaitingForMicroService(MicroService m) {
+		return 0;
+	}
 }

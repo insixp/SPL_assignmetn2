@@ -17,8 +17,8 @@ public interface MessageBus {
      * @param <T>  The type of the result expected by the completed event.
      * @param type The type to subscribe to,
      * @param m    The subscribing micro-service.
-     * @PRE:
-     * @POST:
+     * @PRE: isSubscribed(type, m) == false
+     * @POST: isSubscribed(type, m) == true
      */
     <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m);
 
@@ -27,6 +27,8 @@ public interface MessageBus {
      * <p>
      * @param type 	The type to subscribe to.
      * @param m    	The subscribing micro-service.
+     * @PRE: isSubscribed(type, m) == false
+     * @POST: isSubscribed(type, m) == true
      */
     void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m);
 
@@ -39,6 +41,8 @@ public interface MessageBus {
      * @param <T>    The type of the result expected by the completed event.
      * @param e      The completed event.
      * @param result The resolved result of the completed event.
+     * @PRE: isComplete(e) == false
+     * @POST: isComplete(e) == true
      */
     <T> void complete(Event<T> e, T result);
 
@@ -47,6 +51,8 @@ public interface MessageBus {
      * micro-services subscribed to {@code b.getClass()}.
      * <p>
      * @param b 	The message to added to the queues.
+     * @PRE: none
+     * @POST: Vm-isSubscribed(e, m): messagesWaitingForMicroService(m) = @PRE: messagesWaitingForMicroService(m) + 1
      */
     void sendBroadcast(Broadcast b);
 
@@ -59,6 +65,8 @@ public interface MessageBus {
      * @param e     	The event to add to the queue.
      * @return {@link Future<T>} object to be resolved once the processing is complete,
      * 	       null in case no micro-service has subscribed to {@code e.getClass()}.
+     * @PRE: none
+     * @POST: Em-isSubscribed(e, m): messagesWaitingForMicroService(m) = @PRE: messagesWaitingForMicroService(m) + 1
      */
     <T> Future<T> sendEvent(Event<T> e);
 
@@ -66,6 +74,8 @@ public interface MessageBus {
      * Allocates a message-queue for the {@link MicroService} {@code m}.
      * <p>
      * @param m the micro-service to create a queue for.
+     * @PRE: isRegistered(m) == false
+     * @POST: isRegistered(m) == true
      */
     void register(MicroService m);
 
@@ -76,6 +86,8 @@ public interface MessageBus {
      * registered, nothing should happen.
      * <p>
      * @param m the micro-service to unregister.
+     * @PRE: isRegistered(m) = true
+     * @POST: isRegistered(m) = false
      */
     void unregister(MicroService m);
 
@@ -93,7 +105,39 @@ public interface MessageBus {
      * @return The next message in the {@code m}'s queue (blocking).
      * @throws InterruptedException if interrupted while waiting for a message
      *                              to became available.
+     * @PRE: isRegistered(m) == true
+     * @POST: messagesWaitingForMicroService(m) = @PRE: messagesWaitingForMicroService(m)-1
      */
     Message awaitMessage(MicroService m) throws InterruptedException;
-    
+
+    /**
+     * Using this method we can check if a micro service is subscribed to a certain
+     * Type of Messages.
+     * @PRE: none
+     * @POST: trivial
+     */
+    boolean isSubscribed(Class<? extends Message> type, MicroService m);
+
+    /**
+     * Using this method we can check if a certain event was completed
+     * @PRE: none
+     * @POST: trivial
+     */
+    <T> boolean isComplete(Event<T> e);
+
+    /**
+     * Using this method we can check if a certain event was completed
+     * @PRE: none
+     * @POST: trivial
+     */
+    boolean isRegister(MicroService m);
+
+    /**
+     * Using this method we can check how many messages wait for the microService m to read
+     * @param m
+     * @return number of message waiting for m to read
+     * @PRE: none
+     * @POST: trivial
+     */
+    int messagesWaitingForMicroService(MicroService m);
 }
