@@ -34,7 +34,7 @@ public class MessageBusTest extends TestCase {
     @Test
     public void setUp() throws Exception {
         super.setUp();
-        this.msgBus = new MessageBusImpl();
+        this.msgBus = MessageBusImpl.getInstance();
     }
 
     @Test

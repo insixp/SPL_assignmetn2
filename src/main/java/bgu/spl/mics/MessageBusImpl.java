@@ -1,5 +1,11 @@
 package bgu.spl.mics;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
  * Write your implementation here!
@@ -7,9 +13,32 @@ package bgu.spl.mics;
  */
 public class MessageBusImpl implements MessageBus {
 
+	List<BlockingQueue<Message>> Q_list;
+
+	private class MessageQ {
+		BlockingQueue<Message> Q;
+		Class<?> classType;
+
+		public MessageQ(Class<?> classType){
+			this.classType = classType;
+			this.Q = new LinkedBlockingQueue<Message>();
+		}
+	}
+
+	private static class singletonHolder{
+		private static MessageBusImpl instance = new MessageBusImpl();
+	}
+
+	private MessageBusImpl(){
+		this.Q_list = new ArrayList<BlockingQueue<Message>>();
+	}
+
+	public static MessageBusImpl getInstance(){
+		return singletonHolder.instance;
+	}
+
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		// TODO Auto-generated method stub
 
 	}
 

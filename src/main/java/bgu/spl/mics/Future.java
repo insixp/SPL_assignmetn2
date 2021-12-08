@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A Future object represents a promised result - an object that will
@@ -11,12 +12,16 @@ import java.util.concurrent.TimeUnit;
  * No public constructor is allowed except for the empty constructor.
  */
 public class Future<T> {
+
+	T result;
+	boolean completed;
 	
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
 	public Future() {
-		//TODO: implement this
+		this.result = null;
+		this.completed = false;
 	}
 	
 	/**
@@ -28,9 +33,15 @@ public class Future<T> {
      * @PRE: none
 	 * @POST: trivial
      */
-	public T get() {
-		//TODO: implement this.
-		return null;
+	public synchronized T get() {
+		while (!this.completed) {
+			try{
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return this.result;
 	}
 	
 	/**
@@ -38,8 +49,12 @@ public class Future<T> {
 	 * @PRE: none
 	 * @POST: get() == result
      */
-	public void resolve (T result) {
-		//TODO: implement this.
+	public synchronized void resolve (T result) {
+		if(!this.completed) {
+			this.result = result;
+			this.completed = true;
+			notifyAll();
+		}
 	}
 	
 	/**
@@ -48,8 +63,7 @@ public class Future<T> {
 	 * @POST: trivial
      */
 	public boolean isDone() {
-		//TODO: implement this.
-		return false;
+		return this.completed;
 	}
 	
 	/**
@@ -57,7 +71,7 @@ public class Future<T> {
      * This method is non-blocking, it has a limited amount of time determined
      * by {@code timeout}
      * <p>
-     * @param timout 	the maximal amount of time units to wait for the result.
+     * @param timeout 	the maximal amount of time units to wait for the result.
      * @param unit		the {@link TimeUnit} time units to wait.
      * @return return the result of type T if it is available, if not, 
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
@@ -66,7 +80,15 @@ public class Future<T> {
 	 * @POST: trivial
      */
 	public T get(long timeout, TimeUnit unit) {
-		//TODO: implement this.
+		if(this.completed)
+			return this.result;
+		try{
+			unit.sleep(timeout);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(this.completed)
+			return this.result;
 		return null;
 	}
 
