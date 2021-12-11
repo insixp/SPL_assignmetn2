@@ -28,8 +28,12 @@ public class MessageBusTest extends TestCase {
         }
     }
     private class testBroadcastMSG implements Broadcast {}
-    private class testEventMSG implements Event<String>{}
-    private class testEventMSG2 implements Event<String>{}
+    private class testEventMSG implements Event<String>{
+        String name = "message1";
+    }
+    private class testEventMSG2 implements Event<String>{
+        String name = "message2";
+    }
 
     @Test
     public void setUp() throws Exception {

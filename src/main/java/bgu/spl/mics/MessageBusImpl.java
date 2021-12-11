@@ -10,6 +10,7 @@ import java.util.concurrent.*;
  */
 public class MessageBusImpl implements MessageBus {
 
+	Object Sync = new Object();
 	ConcurrentHashMap<MicroService, BlockingQueue<Message>> MSToQHT;	//	Micro service to Queue
 	ConcurrentHashMap<Class<? extends Message>, ConcurrentLinkedQueue<MicroService>> MessageToMSHT;	//	Message to Micro service queue helps with round robin too.
 	ConcurrentHashMap<Event, Future> EventToFutureHT;	//	Message to Future
@@ -75,54 +76,49 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void register(MicroService m) {
 		//	Create new Q for the Micro service;
-		this.MSToQHT.put(m, new LinkedBlockingQueue<>());
+		synchronized (Sync) {
+			this.MSToQHT.put(m, new LinkedBlockingQueue<>());
+		}
 	}
 
 	@Override
 	public void unregister(MicroService m) {
 		//	First remove Microservice from any messages he's subscribed too.
-		List<ConcurrentLinkedQueue<MicroService>> MSQ_list = Collections.list(this.MessageToMSHT.elements());
-		for(ConcurrentLinkedQueue<MicroService> MSQ : MSQ_list){
-			if(MSQ.contains(m))
-				MSQ.remove(m);
+		synchronized (Sync) {
+			List<ConcurrentLinkedQueue<MicroService>> MSQ_list = Collections.list(this.MessageToMSHT.elements());
+			for (ConcurrentLinkedQueue<MicroService> MSQ : MSQ_list) {
+				if (MSQ.contains(m))
+					MSQ.remove(m);
+			}
+			this.MSToQHT.remove(m);
 		}
-		this.MSToQHT.remove(m);
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		BlockingQueue<Message> MsgQ = null;
-		synchronized (this.MSToQHT) {
-			if(this.MSToQHT.containsKey(m))
-				MsgQ = this.MSToQHT.get(m);
+		BlockingQueue<Message> MsgQ = this.MSToQHT.get(m);
+		if(MsgQ == null)
+			throw new InterruptedException("Microservice " + m.getName() + " is unregistered");
+		while (MsgQ.isEmpty()){
+			MsgQ.wait();
 		}
-		if(MsgQ != null) {	//	ask if synchronize can fuck up between this line and the next.
-			synchronized (MsgQ) {
-				while(MsgQ != null && MsgQ.isEmpty())
-					wait();
-				if(MsgQ != null)
-					return MsgQ.poll();
-			}
-		}
-		return null;
+		return MsgQ.poll();
 	}
 
 	@Override
 	public boolean isSubscribed(Class<? extends Message> type, MicroService m) {
-		synchronized (this.MessageToMSHT) {
-			if (this.MessageToMSHT.containsKey(type))
-				return this.MessageToMSHT.get(type).contains(m);
+		ConcurrentLinkedQueue<MicroService> MSQ = this.MessageToMSHT.get(type);
+		if(MSQ == null)
 			return false;
-		}
+		return MSQ.contains(m);
 	}
 
 	@Override
 	public <T> boolean isComplete(Event<T> e) {
-		synchronized (this.EventToFutureHT) {
-			if (this.EventToFutureHT.containsKey(e))
-				return this.EventToFutureHT.get(e).isDone();
+		Future f = this.EventToFutureHT.get(e);
+		if(f == null)
 			return false;
-		}
+		return f.isDone();
 	}
 
 	@Override
@@ -132,27 +128,24 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public int messagesWaitingForMicroService(MicroService m) {
-		synchronized (this.MSToQHT) {
-			if (this.MSToQHT.containsKey(m))
-				return this.MSToQHT.get(m).size();
+		BlockingQueue<Message> MsgQ = this.MSToQHT.get(m);
+		if(MsgQ == null)
 			return -1;
-		}
+		return MsgQ.size();
 	}
 
 	private void subscribeMicroServiceToMessages(Class<? extends Message> type, MicroService m){
-		//if (this.isRegister(m) & !this.isSubscribed(type, m)){
-			//	add Microservice to the MessageToMSHT
-		ConcurrentLinkedQueue<MicroService> MSQ = null;
-		synchronized (this.MessageToMSHT) {
-			if(this.MessageToMSHT.containsKey(type))
-				MSQ = this.MessageToMSHT.get(type);
-		}
-		if (MSQ != null) {
-			MSQ.add(m);
-		} else {
-			MSQ = new ConcurrentLinkedQueue<>();
-			MSQ.add(m);
-			this.MessageToMSHT.put(type, MSQ);
+		synchronized (Sync){
+			if(this.isRegister(m) & !this.isSubscribed(type, m)){
+				ConcurrentLinkedQueue<MicroService> MSQ = this.MessageToMSHT.get(type);
+				if (MSQ != null) {
+					MSQ.add(m);
+				} else {
+					MSQ = new ConcurrentLinkedQueue<>();
+					MSQ.add(m);
+					this.MessageToMSHT.put(type, MSQ);
+				}
+			}
 		}
 	}
 }
