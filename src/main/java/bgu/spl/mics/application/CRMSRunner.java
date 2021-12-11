@@ -1,9 +1,7 @@
 package bgu.spl.mics.application;
 
 import bgu.spl.mics.MessageBusImpl;
-import bgu.spl.mics.application.objects.Cluster;
-import bgu.spl.mics.application.objects.ConfrenceInformation;
-import bgu.spl.mics.application.objects.Setup;
+import bgu.spl.mics.application.objects.*;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -20,26 +18,25 @@ public class CRMSRunner {
             Gson gson = new Gson();
             JsonReader jsReader = new JsonReader(new FileReader("example_input.json"));
             Setup s = gson.fromJson(jsReader, Setup.class);
-            //  Activate message bus
-            MessageBusImpl msgBus = MessageBusImpl.getInstance();
-            //  Activate cluster
-            Cluster cluster = Cluster.getInstance();
-            //  Add gpu micro service
-            for(String gpu_type : s.GPUS){
-                //  Run new thread of GPU
+            MessageBusImpl msgBus = MessageBusImpl.getInstance();   //  Activate message bus
+            Cluster cluster = Cluster.getInstance();    //  Activate cluster
+            for(String gpu_type : s.GPUS){  //  Add gpu micro service.
+
             }
-            //  Add cpu micro service
-            for(int cpu_cores : s.CPUS){
+            for(int cpu_cores : s.CPUS){ //  Add cpu microservice.
                 //  Run new thread of CPU
             }
-            //  Add Conference Micro Service
-            for(ConfrenceInformation ci : s.Conferences){
+            for(ConfrenceInformation ci : s.Conferences){ //  Add Conference Micro Service.
                 //  Run new Microservice of conference
             }
-            //  Add student micro service
-            for(Setup.sStudent student: s.Students){
-                //  Run new Microservice of Student
+            for(Setup.sStudent setupStudent : s.Students){ //  Add student microservice.
+                Student student = new Student(setupStudent.name, setupStudent.department, Student.stringToDegree(setupStudent.status));
+                for(Setup.sModel m : setupStudent.models){
+                    student.addModel(new Model(m.name, new Data(Data.stringToType(m.type), m.size), student));
+                }
+                //  Run new Microservice of student
             }
+            //  Add Tick microservice
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

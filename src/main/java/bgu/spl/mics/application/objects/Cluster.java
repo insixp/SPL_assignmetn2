@@ -1,7 +1,9 @@
 package bgu.spl.mics.application.objects;
 
 
-import java.util.Collection;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Passive object representing the cluster.
@@ -12,14 +14,18 @@ import java.util.Collection;
  */
 public class Cluster {
 
-	Collection<GPU> gpuCollection;
-	Collection<CPU> cpuCollection;
+	List<Integer> 	gpuCollection;
+	Queue<Integer> 	cpuCollection;
+	ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DataBatch>> toCPUQs;
+	ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DataBatch>> toGPUQs;
 	Statistics		statistics;
 
 
-	public Cluster(Collection<GPU> gpuCollection, Collection<CPU> cpuCollection){
-		this.gpuCollection = gpuCollection;
-		this.cpuCollection = cpuCollection;
+	public Cluster(){
+		this.gpuCollection = new LinkedList<>();
+		this.cpuCollection = new LinkedList<>();
+		this.toCPUQs = new ConcurrentHashMap<>();
+		this.toGPUQs = new ConcurrentHashMap<>();
 		this.statistics = new Statistics();
 	}
 
@@ -27,7 +33,7 @@ public class Cluster {
      * Retrieves the single instance of this class.
      */
 	public static class SingletonHolder{
-		private static Cluster instance = new Cluster(null, null);
+		private static Cluster instance = new Cluster();
 	}
 
 	public static Cluster getInstance() {
@@ -35,18 +41,57 @@ public class Cluster {
 		return SingletonHolder.instance;
 	}
 
-	public boolean sendToCpu(DataBatch db){ return false; }
-	public int messagesByCPU(int cpuId) { return 0; }
-	public int messagesToCPU(int cpuId) { return 0; }
-	public DataBatch readByCpu(int cpuId){ return null; }
-	public boolean sendToGpu(DataBatch db){ return false; }
-	public int messagesByGPU(int gpuId) { return 0; }
-	public int messagesToGPU(int gpuId) { return 0; }
-	public DataBatch readByGpu(int gpuId){ return null; }
-	public void registerCPU(int cpuId){}
-	public void unregisterCPU(int cpu){}
-	public void registerGPU(int gpuId){}
-	public void unregisterGPU(int gpuId){}
-	public boolean isCPURegistered(int cpuId){ return true; }
-	public boolean isGPURegistered(int gpuId){ return true; }
+	public void sendToCpu(DataBatch db){
+		Integer cpuId;
+		ConcurrentLinkedQueue<DataBatch> dbQ;
+		synchronized (this.cpuCollection) {
+			cpuId = this.cpuCollection.poll();
+			this.cpuCollection.add(cpuId);
+			dbQ = this.toCPUQs.get(cpuId);
+		}
+		dbQ.add(db);
+	}
+	public long messagesByCPU(int cpuId) { return this.statistics.getSentCpu(cpuId); }
+	public long messagesToCPU(int cpuId) { return this.statistics.getRecievedCpu((cpuId)); }
+	public DataBatch readByCpu(int cpuId){
+		ConcurrentLinkedQueue<DataBatch> CpuQ = this.toCPUQs.get(cpuId);
+		if(CpuQ != null)
+			return CpuQ.poll();
+		return null;
+	}
+	public boolean sendToGpu(DataBatch db){
+		//	Put inside GPU
+		return false;
+	}
+	public long messagesByGPU(int gpuId) { return this.statistics.getSentGpu(gpuId); }
+	public long messagesToGPU(int gpuId) { return this.statistics.getRecievedGpu(gpuId); }
+	public DataBatch readByGpu(int gpuId){
+		ConcurrentLinkedQueue<DataBatch> GpuQ = this.toGPUQs.get(gpuId);
+		if(GpuQ != null)
+			return GpuQ.poll();
+		return null;
+	}
+	public void registerCPU(int cpuId){
+		ConcurrentLinkedQueue<DataBatch> CpuQ = new ConcurrentLinkedQueue<DataBatch>();
+
+		this.toCPUQs.put(new Integer(cpuId), CpuQ);
+		this.cpuCollection.add(new Integer(cpuId));
+	}
+	public void unregisterCPU(int cpuId){
+		synchronized (cpuCollection) {
+			this.cpuCollection.remove(new Integer(cpuId));
+		}
+	}
+	public void registerGPU(int gpuId){
+		ConcurrentLinkedQueue<DataBatch> GpuQ = new ConcurrentLinkedQueue<DataBatch>();
+		this.toCPUQs.put(new Integer(gpuId), GpuQ);
+		this.cpuCollection.add(new Integer(gpuId));
+	}
+	public void unregisterGPU(int gpuId){
+		synchronized (gpuCollection) {
+			this.cpuCollection.remove(new Integer(gpuId));
+		}
+	}
+	public boolean isCPURegistered(int cpuId){ return this.cpuCollection.contains(new Integer(cpuId)); }
+	public boolean isGPURegistered(int gpuId){ return this.cpuCollection.contains(new Integer(gpuId)); }
 }

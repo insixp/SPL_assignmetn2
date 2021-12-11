@@ -13,6 +13,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class CPU {
 
+    private int QUEUE_CAP = 10;
     private int cores;
     private int id;
     private Cluster cluster;
@@ -27,8 +28,8 @@ public class CPU {
         this.cluster = cluster;
         this.cluster.registerCPU(this.id);
         this.ticks_to_process = 32/(cores);
-        this.data_collection = new ArrayBlockingQueue<DataBatch>(10);
-        this.ticks_processed = 1;
+        this.data_collection = new ArrayBlockingQueue<DataBatch>(QUEUE_CAP);
+        this.ticks_processed = 0;
         this.active = false;
     }
 
@@ -37,19 +38,6 @@ public class CPU {
      *  @Invariant: 0 <= this.getTicksProcessed() <= 32
      *  @Invariant: data_collection.size()>=0;
      **/
-
-
-    /**
-     *  Read from cluster the next Data batch and add it to the local collection.
-     *  @param: none
-     *  @pre: this.cluster != null
-     *  @pre: this.cluster.messagesToCPU(this.id) > 0
-     *  @post:this.data_collection.size() == @pre data_collection.size()+1
-     *  @post:Vi<data_collection.size(): data_collection.contains(@pre:data_collection[i])
-     *  @post:data_collection.contains(this.cluster.readByCpu())
-     *  @post: this.cluster.messagesToCPU(this.id) = @PRE: this.cluster.messagesToCPU()-1
-     * */
-    public void addDataBatch(){}
 
     /**
      * Return the number of cores.
@@ -116,13 +104,25 @@ public class CPU {
     private int getDataBatchSize(){ return this.data_collection.size(); }
 
     /**
+     *  Returns the number of tick takes to process current data batch.
+     *@param:data_collection.size()!=null
+     *@pre: none
+     *@post:this.data_collection.size()==@pre data_collection.size()
+     */
+    private int getTicktoProcessData(){
+        if(this.getDataBatchSize() > 0)
+            return this.getTopDataBatch().getData().getTicksToProcess();
+        return -1;
+    }
+
+    /**
      *  Increase the internal tick counter
      *@param: this.ticks_processed!=null
      *@pre: none
      *@post:this.ticks_processed==@pre (this.ticks_processed+1)%(this.getTopDataBatch().getData().getTicksToProcess())
      */
     private void incTick(){
-        this.ticks_processed = (this.ticks_processed+1)%(this.getTopDataBatch().getData().getTicksToProcess());
+        this.ticks_processed = (this.ticks_processed+1)%(this.getTicktoProcessData());
     }
 
     /**
@@ -133,11 +133,34 @@ public class CPU {
     public void clusterUnregister(){ this.cluster.unregisterCPU(this.id); }
 
     /**
+     *  Read from cluster the next Data batch and add it to the local collection.
+     *  @param: none
+     *  @pre: this.cluster != null
+     *  @pre: this.cluster.messagesToCPU(this.id) > 0
+     *  @post:this.data_collection.size() == @pre data_collection.size()+1
+     *  @post:Vi<data_collection.size(): data_collection.contains(@pre:data_collection[i])
+     *  @post:data_collection.contains(this.cluster.readByCpu())
+     *  @post: this.cluster.messagesToCPU(this.id) = @PRE: this.cluster.messagesToCPU()-1
+     * */
+    public boolean addDataBatch(){
+        if(this.getDataBatchSize() != QUEUE_CAP & this.cluster.messagesToCPU(this.id) > 0) {
+            this.data_collection.add(this.cluster.readByCpu(this.id));
+            return true;
+        }
+        return false;
+    }
+
+    /**
      *  Remove processed data and push it to the Cluster.
      *@pre: data_collection.size()>0
      *@post:getTopDataBatch()==(@pre data_collection.poll()).getTopDataBatch();
      */
-    private void removeProcessedData(){}
+    private void removeProcessedData(){
+        if(this.getTicksProcessed() == this.getTicktoProcessData()-1) {
+            this.cluster.sendToGpu(this.data_collection.poll());
+            this.ticks_processed = 0;
+        }
+    }
 
     /**
      *  Process Next tick and push data to cluster if we finished working on it and if the Cluster
@@ -146,13 +169,12 @@ public class CPU {
      *@post:data_collection.size()<=@pre data_collection.size()
      */
     public void processNextTick(){
-//        this.incTick();
-//        if(this.getTicksProcessed() == 0){
-//            DataBatch db = this.getTopDataBatch();
-//            // update data processed size
-//            removeProcessedData();
-//            return db;
-//        }
-//        return null;
+        this.incTick();
+        if(this.getTicksProcessed() == 0) {
+            if(this.getDataBatchSize() > 0)
+                removeProcessedData();
+            if (this.getDataBatchSize() < QUEUE_CAP)
+                this.addDataBatch();
+        }
     }
 }

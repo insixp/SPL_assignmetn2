@@ -37,5 +37,13 @@ public class Student {
     public Degree getStatus(){ return this.status; }
     public int getPublications(){ return this.publications; }
     public int getPapersRead(){ return this.papersRead; }
+    public void addModel(Model m){ this.models.add(m); }
+    public static Degree stringToDegree(String status){
+        if(status.toLowerCase() == "msc")
+            return Degree.MSc;
+        if(status.toLowerCase() == "phd")
+            return Degree.PhD;
+        return null;
+    }
 
 }

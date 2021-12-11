@@ -34,4 +34,13 @@ public class Data {
             return 1;
         return -1;
     }
+    public static Type stringToType(String type){
+        if(type.toLowerCase() == "images")
+            return Type.Text;
+        if(type.toLowerCase() == "text")
+            return Type.Text;
+        if(type.toLowerCase() == "tabular")
+            return Type.Tabular;
+        return null;
+    }
 }

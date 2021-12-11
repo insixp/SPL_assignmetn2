@@ -52,8 +52,9 @@ public class MessageBusImpl implements MessageBus {
 		ConcurrentLinkedQueue<MicroService> BroadcastQ = this.MessageToMSHT.get(b.getClass());
 		if(!BroadcastQ.isEmpty()) {
 			for (MicroService microService : BroadcastQ) {
-				BlockingQueue<Message> MSQ = MSToQHT.get(microService);
-				MSQ.add(b);
+				BlockingQueue<Message> MsgQ = MSToQHT.get(microService);
+				MsgQ.add(b);
+				MsgQ.notifyAll();
 			}
 		}
 	}
@@ -68,6 +69,7 @@ public class MessageBusImpl implements MessageBus {
 			Future<T> future = new Future<>();
 			this.EventToFutureHT.put(e, future);
 			MsgQ.add(e);
+			MsgQ.notifyAll();
 			return future;
 		}
 		return null;
