@@ -36,7 +36,7 @@ public class Future<T> {
 	public synchronized T get() {
 		while (!this.completed) {
 			try{
-				wait();
+				this.wait();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -53,7 +53,7 @@ public class Future<T> {
 		if(!this.completed) {
 			this.result = result;
 			this.completed = true;
-			notifyAll();
+			this.notifyAll();
 		}
 	}
 	
@@ -62,7 +62,7 @@ public class Future<T> {
 	 * @PRE: none
 	 * @POST: trivial
      */
-	public boolean isDone() {
+	public synchronized boolean isDone() {
 		return this.completed;
 	}
 	
@@ -79,13 +79,13 @@ public class Future<T> {
 	 * @PRE: none
 	 * @POST: trivial
      */
-	public T get(long timeout, TimeUnit unit) {
-		if(this.completed)
-			return this.result;
-		try{
-			unit.sleep(timeout);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	public synchronized T get(long timeout, TimeUnit unit) {
+		if(!this.completed) {
+			try{
+				this.wait(unit.toMillis(timeout));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		if(this.completed)
 			return this.result;

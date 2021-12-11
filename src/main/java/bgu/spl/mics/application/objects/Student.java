@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.Collection;
+import java.util.Deque;
+
 /**
  * Passive object representing single student.
  * Add fields and methods to this class as you see fit (including public methods and constructors).
@@ -15,12 +18,15 @@ public class Student {
     private String name;
     private String department;
     private Degree status;
+    private Collection<Model> models;
     private int publications;
     private int papersRead;
 
     public Student(String name, String department, Degree status){
+        this.models = models;
         this.name = name;
         this.department = department;
+        this.models = null;
         this.status = status;
         this.publications = 0;
         this.papersRead = 0;

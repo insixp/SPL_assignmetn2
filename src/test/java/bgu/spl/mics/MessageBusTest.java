@@ -49,6 +49,7 @@ public class MessageBusTest extends TestCase {
     //  Checks valid communication between subscriber and sender
     public void testSubscribeSendEvent() {
         testMicroService testMS = new testMicroService("tesToro");
+        testMS.initialize();
         testEventMSG event = new testEventMSG();
         this.msgBus.subscribeEvent(testEventMSG.class, testMS);
         this.msgBus.sendEvent(event);
@@ -67,6 +68,7 @@ public class MessageBusTest extends TestCase {
     //  Checks valid communication between subscriber and sender
     public void testSubscribeSendBroadcast() {
         testMicroService testMS = new testMicroService("tesToro");
+        testMS.initialize();
         testBroadcastMSG broadcast = new testBroadcastMSG();
         this.msgBus.subscribeBroadcast(testBroadcastMSG.class, testMS);
         this.msgBus.sendBroadcast(broadcast);
@@ -86,7 +88,9 @@ public class MessageBusTest extends TestCase {
     //  This test makes sure the complete sets the correct value of the correct variable.
     public void testComplete() {
         testMicroService testMS = new testMicroService("tesToro");
+        testMS.initialize();
         testMicroService testMS2 = new testMicroService("testToto");
+        testMS2.initialize();
         testEventMSG eventMSG = new testEventMSG();
         testEventMSG2 eventMSG2 = new testEventMSG2();
         this.msgBus.subscribeEvent(testEventMSG.class, testMS);
@@ -117,6 +121,7 @@ public class MessageBusTest extends TestCase {
 
     public void testIsSubscribed() {
         testMicroService testMS = new testMicroService("tesToro");
+        testMS.initialize();
         testEventMSG eventMSG = new testEventMSG();
         this.msgBus.subscribeEvent(testEventMSG.class, testMS);
         assertEquals(true, this.msgBus.isSubscribed(testEventMSG.class, testMS));
@@ -125,8 +130,10 @@ public class MessageBusTest extends TestCase {
 
     public void testIsRegister() {
         testMicroService testMS = new testMicroService("tesToro");
+        testMS.initialize();
         assertEquals(true, this.msgBus.isRegister(testMS));
         testMicroService2 testMS2 = new testMicroService2("failoro");
+        testMS2.initialize();
         assertEquals(false, this.msgBus.isRegister(testMS2));
     }
 }
