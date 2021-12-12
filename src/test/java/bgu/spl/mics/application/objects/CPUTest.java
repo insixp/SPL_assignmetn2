@@ -7,6 +7,7 @@ import java.util.Collection;
 
 public class CPUTest extends TestCase {
 
+    private int BATCH_SIZE = 1000;
     private CPU cpu;
     private Cluster cluster;
 
@@ -21,12 +22,14 @@ public class CPUTest extends TestCase {
 
     @Test
     public void testAddGetDataBatch(){
-        this.cpu = new CPU(3, 32, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(3, 32, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         Collection<DataBatch> db_collection = this.cpu.getDataBatches();
         assertEquals(false, db_collection.contains(db));
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         db_collection = this.cpu.getDataBatches();
         assertEquals(1, db_collection.size());
         assertEquals(true, db_collection.contains(db));
@@ -34,10 +37,13 @@ public class CPUTest extends TestCase {
 
     @Test
     public void testProcessedData() {
-        this.cpu = new CPU(0, 32, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(0, 32, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
+        assertNull(this.cluster.readByGpu(2));
         this.cpu.processNextTick();
         assertNull(this.cluster.readByGpu(2));
         this.cpu.processNextTick();
@@ -57,10 +63,14 @@ public class CPUTest extends TestCase {
 
     @Test
     public void test32CoresImage(){
-        this.cpu = new CPU(0, 32, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(0, 32, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        this.cluster.registerGPU(3);
+        this.cluster.registerGPU(5);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Image
         for(int i = 0; i < 4;i++){
             this.cpu.processNextTick();
@@ -70,35 +80,41 @@ public class CPUTest extends TestCase {
             else
                 assertNull(processedDB);
         }
-        data = new Data(Data.Type.Text, 5000);
-        db = new DataBatch(data, 2000, 5);
+        data = new Data(Data.Type.Text, 1000);
+        db = new DataBatch(data, 2000, 3);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Text
         for(int i = 0; i < 2;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(3);
             if(i == 1)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
         }
         //  Tabular
-        data = new Data(Data.Type.Tabular, 5000);
+        data = new Data(Data.Type.Tabular, 1000);
         db = new DataBatch(data, 2000, 5);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         for(int i = 0; i < 1;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(5);
             assertNotNull(processedDB);
         }
     }
 
     @Test
     public void test16CoresImage(){
-        this.cpu = new CPU(0, 16, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(0, 16, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        this.cluster.registerGPU(3);
+        this.cluster.registerGPU(5);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Image
         for(int i = 0; i < 8;i++){
             this.cpu.processNextTick();
@@ -108,25 +124,27 @@ public class CPUTest extends TestCase {
             else
                 assertNull(processedDB);
         }
-        data = new Data(Data.Type.Text, 5000);
-        db = new DataBatch(data, 2000, 5);
+        data = new Data(Data.Type.Text, 1000);
+        db = new DataBatch(data, 2000, 3);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Text
         for(int i = 0; i < 4;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(3);
             if(i == 3)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
         }
         //  Tabular
-        data = new Data(Data.Type.Tabular, 5000);
+        data = new Data(Data.Type.Tabular, 1000);
         db = new DataBatch(data, 2000, 5);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         for(int i = 0; i < 2;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(5);
             if(i == 1)
                 assertNotNull(processedDB);
             else
@@ -136,10 +154,14 @@ public class CPUTest extends TestCase {
 
     @Test
     public void test8CoresImage(){
-        this.cpu = new CPU(0, 8, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(0, 8, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        this.cluster.registerGPU(3);
+        this.cluster.registerGPU(5);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Image
         for(int i = 0; i < 16;i++){
             this.cpu.processNextTick();
@@ -149,25 +171,27 @@ public class CPUTest extends TestCase {
             else
                 assertNull(processedDB);
         }
-        data = new Data(Data.Type.Text, 5000);
-        db = new DataBatch(data, 2000, 5);
+        data = new Data(Data.Type.Text, 1000);
+        db = new DataBatch(data, 2000, 3);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         //  Text
         for(int i = 0; i < 8;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(3);
             if(i == 7)
                 assertNotNull(processedDB);
             else
                 assertNull(processedDB);
         }
         //  Tabular
-        data = new Data(Data.Type.Tabular, 5000);
+        data = new Data(Data.Type.Tabular, 1000);
         db = new DataBatch(data, 2000, 5);
         this.cluster.sendToCpu(db);
+        this.cpu.processNextTick();
         for(int i = 0; i < 4;i++){
             this.cpu.processNextTick();
-            DataBatch processedDB = this.cluster.readByGpu(2);
+            DataBatch processedDB = this.cluster.readByGpu(5);
             if(i == 3)
                 assertNotNull(processedDB);
             else
@@ -176,30 +200,36 @@ public class CPUTest extends TestCase {
     }
 
     public void testGetId() {
-        this.cpu = new CPU(98, 32, this.cluster);
+        this.cpu = new CPU(98, 32, BATCH_SIZE, this.cluster);
         assertEquals(this.cpu.getId(), 98);
     }
 
     @Test
     public void testGetCores(){
-        this.cpu = new CPU(98, 24, this.cluster);
+        this.cpu = new CPU(98, 24, BATCH_SIZE, this.cluster);
         assertEquals(24, this.cpu.getCores());
     }
 
     @Test
     public void testGetActive(){
-        this.cpu = new CPU(98, 24, this.cluster);
+        this.cpu = new CPU(98, 24, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(3);
         assertEquals(false, this.cpu.getActive());
-        this.cluster.sendToCpu(new DataBatch(new Data(Data.Type.Images, 20000), 5000, 3));
+        this.cluster.sendToCpu(new DataBatch(new Data(Data.Type.Images, 1000), 5000, 3));
+        this.cpu.processNextTick();
         assertEquals(true, this.cpu.getActive());
     }
 
     public void testGetTicksProcessed() {
-        this.cpu = new CPU(95, 23, this.cluster);
-        Data data = new Data(Data.Type.Images, 20000);
+        this.cpu = new CPU(95, 23, BATCH_SIZE, this.cluster);
+        this.cluster.registerGPU(2);
+        Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
-        this.cluster.sendToCpu(db);
+        for(int i = 0; i < 40; i++) {
+            this.cluster.sendToCpu(db);
+        }
         assertEquals(this.cpu.getTicksProcessed(), 0);
+        this.cpu.processNextTick();
         for(int i = 1; i < 100; i++){
             this.cpu.processNextTick();
             assertEquals(this.cpu.getTicksProcessed(), i%(data.getTicksToProcess()));

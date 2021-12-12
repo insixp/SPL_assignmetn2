@@ -13,24 +13,24 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class CPU {
 
+    private final int BATCH_SIZE;
     private int QUEUE_CAP = 10;
     private int cores;
     private int id;
     private Cluster cluster;
     private final int ticks_to_process;
     private int ticks_processed;
-    private boolean active;
     private Queue<DataBatch> data_collection;
 
-    public CPU(int id, int cores, Cluster cluster){
+    public CPU(int id, int cores, int batchSize, Cluster cluster){
         this.id = id;
         this.cores = cores;
+        this.BATCH_SIZE = batchSize;
         this.cluster = cluster;
         this.cluster.registerCPU(this.id);
         this.ticks_to_process = 32/(cores);
         this.data_collection = new ArrayBlockingQueue<DataBatch>(QUEUE_CAP);
         this.ticks_processed = 0;
-        this.active = false;
     }
 
     /**
@@ -53,7 +53,7 @@ public class CPU {
      * @pre: none
      * @post: this.active = @pre:this.active
      */
-    public boolean getActive(){ return this.active; }
+    public boolean getActive(){ return !this.data_collection.isEmpty(); }
 
     /**
      * Return all data batches in the local collection
@@ -111,7 +111,7 @@ public class CPU {
      */
     private int getTicktoProcessData(){
         if(this.getDataBatchSize() > 0)
-            return this.getTopDataBatch().getData().getTicksToProcess();
+            return (32/this.cores)*this.getTopDataBatch().getData().getTicksToProcess();
         return -1;
     }
 
@@ -142,12 +142,8 @@ public class CPU {
      *  @post:data_collection.contains(this.cluster.readByCpu())
      *  @post: this.cluster.messagesToCPU(this.id) = @PRE: this.cluster.messagesToCPU()-1
      * */
-    public boolean addDataBatch(){
-        if(this.getDataBatchSize() != QUEUE_CAP & this.cluster.messagesToCPU(this.id) > 0) {
-            this.data_collection.add(this.cluster.readByCpu(this.id));
-            return true;
-        }
-        return false;
+    private void addDataBatch(){
+        this.data_collection.add(this.cluster.readByCpu(this.id));
     }
 
     /**
@@ -156,10 +152,12 @@ public class CPU {
      *@post:getTopDataBatch()==(@pre data_collection.poll()).getTopDataBatch();
      */
     private void removeProcessedData(){
-        if(this.getTicksProcessed() == this.getTicktoProcessData()-1) {
-            this.cluster.sendToGpu(this.data_collection.poll());
-            this.ticks_processed = 0;
-        }
+        DataBatch db = this.data_collection.poll();
+        if(db.getData().getSize() != BATCH_SIZE)
+            throw new IllegalArgumentException("Data batch size is not good");
+        db.getData().incProcessed(db.getData().getSize());
+        this.cluster.sendToGpu(db);
+        this.ticks_processed = 0;
     }
 
     /**
@@ -168,13 +166,14 @@ public class CPU {
      *@pre: data_collection.size()>=0
      *@post:data_collection.size()<=@pre data_collection.size()
      */
-    public void processNextTick(){
+    public void processNextTick() {
         this.incTick();
-        if(this.getTicksProcessed() == 0) {
-            if(this.getDataBatchSize() > 0)
-                removeProcessedData();
-            if (this.getDataBatchSize() < QUEUE_CAP)
+        if (this.getTicksProcessed() == 0) {
+            if (this.getDataBatchSize() > 0)
+                this.removeProcessedData();
+            while (!this.cluster.CpuQIsEmpty(this.id) & this.data_collection.size() < QUEUE_CAP) {
                 this.addDataBatch();
+            }
         }
     }
 }

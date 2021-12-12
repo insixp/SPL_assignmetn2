@@ -43,4 +43,8 @@ public class Data {
             return Type.Tabular;
         return null;
     }
+
+    public void incProcessed(int size){
+        this.processed += size;
+    }
 }

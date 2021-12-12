@@ -41,6 +41,23 @@ public class Cluster {
 		return SingletonHolder.instance;
 	}
 
+	//	CPU
+	public DataBatch readByCpu(int cpuId){
+		ConcurrentLinkedQueue<DataBatch> CpuQ = this.toCPUQs.get(cpuId);
+		if(CpuQ != null) {
+			this.statistics.incRecievedCpu(cpuId);
+			return CpuQ.poll();
+		}
+		return null;
+	}
+	public void sendToGpu(DataBatch db){
+		Integer gpuId = db.getGpuId();
+		ConcurrentLinkedQueue<DataBatch> MsgQ = this.toGPUQs.get(gpuId);
+		MsgQ.add(db);
+	}
+	public boolean CpuQIsEmpty(int cpuId){ return this.toCPUQs.get(cpuId).isEmpty(); }
+
+	//	GPU
 	public void sendToCpu(DataBatch db){
 		Integer cpuId;
 		ConcurrentLinkedQueue<DataBatch> dbQ;
@@ -50,30 +67,27 @@ public class Cluster {
 			dbQ = this.toCPUQs.get(cpuId);
 		}
 		dbQ.add(db);
+		this.statistics.incSentCpu(cpuId);
 	}
-	public long messagesByCPU(int cpuId) { return this.statistics.getSentCpu(cpuId); }
-	public long messagesToCPU(int cpuId) { return this.statistics.getRecievedCpu((cpuId)); }
-	public DataBatch readByCpu(int cpuId){
-		ConcurrentLinkedQueue<DataBatch> CpuQ = this.toCPUQs.get(cpuId);
-		if(CpuQ != null)
-			return CpuQ.poll();
-		return null;
-	}
-	public boolean sendToGpu(DataBatch db){
-		//	Put inside GPU
-		return false;
-	}
-	public long messagesByGPU(int gpuId) { return this.statistics.getSentGpu(gpuId); }
-	public long messagesToGPU(int gpuId) { return this.statistics.getRecievedGpu(gpuId); }
 	public DataBatch readByGpu(int gpuId){
 		ConcurrentLinkedQueue<DataBatch> GpuQ = this.toGPUQs.get(gpuId);
 		if(GpuQ != null)
 			return GpuQ.poll();
 		return null;
 	}
+	public boolean GpuQIsEmpty(int gpuId){ return this.toGPUQs.get(gpuId).isEmpty(); }
+
+	//	Statistics
+	public long messagesByGPU(int gpuId) { return this.statistics.getSentGpu(gpuId); }
+	public long messagesToGPU(int gpuId) { return this.statistics.getRecievedGpu(gpuId); }
+	public long messagesByCPU(int cpuId) { return this.statistics.getSentCpu(cpuId); }
+	public long messagesToCPU(int cpuId) { return this.statistics.getRecievedCpu((cpuId)); }
+
+	//	Register
 	public void registerCPU(int cpuId){
 		ConcurrentLinkedQueue<DataBatch> CpuQ = new ConcurrentLinkedQueue<DataBatch>();
 
+		this.statistics.addCpu(cpuId);
 		this.toCPUQs.put(new Integer(cpuId), CpuQ);
 		this.cpuCollection.add(new Integer(cpuId));
 	}
@@ -84,8 +98,9 @@ public class Cluster {
 	}
 	public void registerGPU(int gpuId){
 		ConcurrentLinkedQueue<DataBatch> GpuQ = new ConcurrentLinkedQueue<DataBatch>();
-		this.toCPUQs.put(new Integer(gpuId), GpuQ);
-		this.cpuCollection.add(new Integer(gpuId));
+		this.statistics.addGpu(gpuId);
+		this.toGPUQs.put(new Integer(gpuId), GpuQ);
+		this.gpuCollection.add(new Integer(gpuId));
 	}
 	public void unregisterGPU(int gpuId){
 		synchronized (gpuCollection) {
