@@ -2,7 +2,6 @@ package bgu.spl.mics.application.objects;
 
 import junit.framework.TestCase;
 import org.junit.Test;
-
 import java.util.Collection;
 
 public class CPUTest extends TestCase {
@@ -232,7 +231,7 @@ public class CPUTest extends TestCase {
         this.cpu.processNextTick();
         for(int i = 1; i < 100; i++){
             this.cpu.processNextTick();
-            assertEquals(this.cpu.getTicksProcessed(), i%(data.getTicksToProcess()));
+            assertEquals(i%(data.getTicksToProcess()), this.cpu.getTicksProcessed());
         }
     }
 }
