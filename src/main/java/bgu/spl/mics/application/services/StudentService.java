@@ -1,6 +1,14 @@
 package bgu.spl.mics.application.services;
-
+import bgu.spl.mics.Broadcast;
+import bgu.spl.mics.Callback;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.Student;
+import bgu.spl.mics.application.messages.PublishResultsEvent;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -12,14 +20,27 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class StudentService extends MicroService {
-    public StudentService(String name) {
+    Student student;
+
+    public StudentService(String name, String department, Student.Degree status) {
         super("Student: " + name);
+        this.student=new Student(name, department,status);
         // TODO Implement this
+
     }
 
     @Override
     protected void initialize() {
         // TODO Implement this
 
+        MessageBusImpl.getInstance().register(this);
+       // Class<Broadcast> e1= new PublishConferenceBroadcast();
+       // this.subscribeBroadcast(e1, (PublishConferenceBroadcast e) ->{implement});
+
+
     }
+
+
+
+
 }

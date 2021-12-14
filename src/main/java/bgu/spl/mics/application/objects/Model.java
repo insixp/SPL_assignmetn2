@@ -7,11 +7,11 @@ package bgu.spl.mics.application.objects;
  */
 public class Model {
 
-    enum Status {
+    public enum Status {
         PreTrained, Training, Trained, Tested
     }
 
-    enum Result {
+    public enum Result {
         None, Good, Bad
     }
 
@@ -32,7 +32,7 @@ public class Model {
     public String getName(){ return this.name; }
     public Data getData(){ return this.data; }
     public Student getStudent(){ return this.student; }
-    public Status getStatus(){ return this.status; }
     public Result getResult(){ return this.result; }
-
+    public void setResult(Result r){this.result=r;}
+    public void setStatus(Status s){this.status=s;}
 }

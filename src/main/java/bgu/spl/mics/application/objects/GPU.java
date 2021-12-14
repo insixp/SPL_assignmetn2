@@ -1,6 +1,10 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.Queue;
 import java.util.Random;
+
+import static bgu.spl.mics.application.objects.Model.Status.Trained;
+import static bgu.spl.mics.application.objects.Model.Status.Training;
 
 /**
  * Passive object representing a single GPU.
@@ -11,7 +15,7 @@ public class GPU {
     /**
      * Enum representing the type of the GPU.
      */
-    enum Type {RTX3090, RTX2080, GTX1080}
+   public enum Type {RTX3090, RTX2080, GTX1080}
 
     public final int BATCH_SIZE = 1000;
     private final Type type;
@@ -23,6 +27,9 @@ public class GPU {
     private boolean active;
     private int vmemOccupied;
     private int ticks_processed;
+    public boolean updateFuture;
+    private Queue<DataBatch> vmem;
+
 
     public GPU(int gpuId, Type type, Cluster cluster){
         this.gpuId = gpuId;
@@ -33,6 +40,7 @@ public class GPU {
         this.vmemOccupied = 0;
         this.ticks_processed = 0;
         this.cluster = cluster;
+        this.updateFuture=false;
         this.cluster.registerGPU(this.gpuId);
         if(type == Type.RTX3090)
             this.vmemSize = 32;
@@ -98,9 +106,12 @@ public class GPU {
      *  @PRE: nextBatch + BATCH_SIZE < model.getData().getSize()
      *  @POST: nextBatch += BATCH_SIZE
      **/
-    private void incDataBatch(){
-        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize())
+    private boolean incDataBatch(){
+        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()){
             this.nextBatch += this.BATCH_SIZE;
+            return true;
+        }
+            return false;
     }
 
     /**
@@ -133,7 +144,12 @@ public class GPU {
      *  @POST: nextBatch = @pre: nextBatch + BATCH_SIZE
      *  @POST: this.cluster.messagesByGPU() = @PRE: this.cluster.messagesByGPU() + 1
      **/
-    public void popNextDataBatch(){ }
+    public DataBatch popNextDataBatch(){
+        DataBatch d=getNextDataBatch();
+        incDataBatch();
+        incVmemOccupied();
+        return d;
+    }
 
     /**
      *  Unregister the GPU from the cluster
@@ -165,8 +181,10 @@ public class GPU {
     public void setModel(Model model) {
         if(!active) {
             this.model = model;
+            this.model.setStatus(Training);
             this.nextBatch = 0;
             this.active = true;
+            this.ticks_processed=0;
         }
     }
 
@@ -203,8 +221,24 @@ public class GPU {
      *  @POST: this.getVmemOccupied() <= @pre:this.getVmemOcuupied()
      *  @POST: this.getVmemFree() >= @pre:this.getVmemFree()
      **/
-    public void processNextTick(){}
+    public void processNextTick() {
+        this.incTick();
+        if (canSend())//sending one more databatch to cpu if possible
+            cluster.sendToCpu(popNextDataBatch());
+        if (this.getTicksProcessed() == 0) {//if finishes to process the last data batch
+                if(!vmem.isEmpty()) {
+                    vmem.poll();
+                    decVmemOccupied();
+                    updateFuture=true;
+//                    if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize())
+//                        future.complete();
+                }
+                else if(vmemOccupied==0){// if all the databatches of the model finished the process
+                    this.model.setStatus(Trained);
+                }
+            }
 
+    }
     /**
      *  Testing a model.
      *  @PRE: none
@@ -218,5 +252,13 @@ public class GPU {
         if(model_in.getStudent().getStatus() == Student.Degree.PhD)
             return rand<20? Model.Result.Good: Model.Result.Bad;
         return Model.Result.None;
+    }
+    public Cluster getCluster(){
+        return this.cluster;
+    }
+    public boolean canSend(){
+        if(getVmemFree()>0 && nextBatch<model.getData().getSize())
+            return true;
+        return false;
     }
 }
