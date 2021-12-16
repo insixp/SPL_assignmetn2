@@ -15,20 +15,27 @@ import bgu.spl.mics.application.objects.CPU;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class CPUService extends MicroService {
-    CPU cpu;
-    public CPUService(String name,int id, int cores, int batchSize, Cluster cluster) {
-        super("CPU:" + name);
-        // TODO Implement this
-        cpu=new CPU( id,cores,batchSize,cluster);
 
+    CPU cpu;
+    MessageBusImpl msgBus;
+
+    public CPUService(int id, int cores, int batchSize, Cluster cluster) {
+        super("CPU " + id);
+        cpu = new CPU(id, cores, batchSize, cluster);
+        msgBus = MessageBusImpl.getInstance();
+    }
+
+    public CPUService(CPU cpu) {
+        super("CPU " + cpu.getId());
+        this.cpu = cpu;
+        msgBus = MessageBusImpl.getInstance();
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
-        MessageBusImpl.getInstance().register(this);
-        Callback<TickBroadcast> tickbrod=e->{this.cpu.processNextTick();};
-        this.subscribeBroadcast(TickBroadcast.class,tickbrod);
+        msgBus.register(this);
+        Callback<TickBroadcast> tickbrod = (TickBroadcast e) -> { this.cpu.processNextTick(); };
+        this.subscribeBroadcast(TickBroadcast.class, tickbrod);
     }
 
 }

@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 
@@ -23,10 +24,9 @@ public class Student {
     private int papersRead;
 
     public Student(String name, String department, Degree status){
-        this.models = models;
         this.name = name;
         this.department = department;
-        this.models = null;
+        this.models = new ArrayList<>();
         this.status = status;
         this.publications = 0;
         this.papersRead = 0;

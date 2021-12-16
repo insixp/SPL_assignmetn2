@@ -2,6 +2,7 @@ package bgu.spl.mics.application.objects;
 
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import static bgu.spl.mics.application.objects.Model.Status.Trained;
 import static bgu.spl.mics.application.objects.Model.Status.Training;
@@ -17,7 +18,7 @@ public class GPU {
      */
    public enum Type {RTX3090, RTX2080, GTX1080}
 
-    public final int BATCH_SIZE = 1000;
+    public final int BATCH_SIZE;
     private final Type type;
     private final int vmemSize;
     private Cluster cluster;
@@ -30,26 +31,27 @@ public class GPU {
     public boolean updateFuture;
     private Queue<DataBatch> vmem;
 
+    public GPU(int gpuId, Type type, int batchSize, Cluster cluster){
 
-    public GPU(int gpuId, Type type, Cluster cluster){
+        //  Set values
         this.gpuId = gpuId;
         this.type = type;
-        this.nextBatch = 0;
+        this.BATCH_SIZE = batchSize;
+        this.cluster = cluster;
+
+        //  Vmem
+        this.vmemSize = this.typeToVmemSize(this.type);
+        this.vmem = new ArrayBlockingQueue<>(this.getVmemSize());
+        this.vmemOccupied = 0;
+
+        //  Initialize
         this.active = false;
         this.model = null;
-        this.vmemOccupied = 0;
         this.ticks_processed = 0;
-        this.cluster = cluster;
-        this.updateFuture=false;
+        this.nextBatch = 0;
+
+        //  Register to cluster
         this.cluster.registerGPU(this.gpuId);
-        if(type == Type.RTX3090)
-            this.vmemSize = 32;
-        else if(type == Type.RTX2080)
-            this.vmemSize = 16;
-        else if(type == Type.GTX1080)
-            this.vmemSize = 8;
-        else
-            this.vmemSize = 0;
     }
 
     /**
@@ -58,6 +60,8 @@ public class GPU {
      * @Invariant: 0 <= this.getVmemOccupied <= 32
      * @Invariant: 0 <= this.getVmemFree() <= 32
      */
+
+    public int getGpuId() { return this.gpuId; }
 
     /**
      *  Returns the size of the virtual memory the GPU has.
@@ -106,12 +110,8 @@ public class GPU {
      *  @PRE: nextBatch + BATCH_SIZE < model.getData().getSize()
      *  @POST: nextBatch += BATCH_SIZE
      **/
-    private boolean incDataBatch(){
-        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()){
+    private void incDataBatch(){
             this.nextBatch += this.BATCH_SIZE;
-            return true;
-        }
-            return false;
     }
 
     /**
@@ -144,11 +144,14 @@ public class GPU {
      *  @POST: nextBatch = @pre: nextBatch + BATCH_SIZE
      *  @POST: this.cluster.messagesByGPU() = @PRE: this.cluster.messagesByGPU() + 1
      **/
-    public DataBatch popNextDataBatch(){
-        DataBatch d=getNextDataBatch();
-        incDataBatch();
-        incVmemOccupied();
-        return d;
+    private DataBatch popNextDataBatch() {
+        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()) {
+            DataBatch db = this.getNextDataBatch();
+            incDataBatch();
+            incVmemOccupied();
+            return db;
+        }
+        return null;
     }
 
     /**
@@ -189,6 +192,13 @@ public class GPU {
         }
     }
 
+    public void sendDataToCPU() throws InterruptedException{
+        DataBatch db = this.popNextDataBatch();
+        if(db == null)
+            throw new InterruptedException("Cannot do this operation");
+        this.cluster.sendToCpu(db);
+    }
+
     /**
      *  Get the processed data of the CPU from the cluster.
      *  @PRE: this.getVmemOccupied > 0
@@ -196,7 +206,9 @@ public class GPU {
      *  @POST: Vmem.contains(db_in)
      *  @POST: this.cluster.messagesToGPU() = @PRE:this.cluster.messagesToGPU()-1
      **/
-    public void getProcessedData(){}
+    public void getProcessedData(){
+        this.vmem.add(this.cluster.readByGpu(this.gpuId));
+    }
 
     /**
      *  Get amount of tick processed ON THE CURRENT DATA BATCH.
@@ -238,6 +250,7 @@ public class GPU {
                 }
             }
     }
+
     /**
      *  Testing a model.
      *  @PRE: none
@@ -252,9 +265,28 @@ public class GPU {
             return rand<20? Model.Result.Good: Model.Result.Bad;
         return Model.Result.None;
     }
-    public Cluster getCluster(){
-        return this.cluster;
+
+    public static Type stringToType(String type){
+        if(type == "RTX3090")
+            return Type.RTX3090;
+        if(type == "RTX2080")
+            return Type.RTX2080;
+        if(type == "GTX1080")
+            return Type.GTX1080;
+        return null;
     }
+
+    private static int typeToVmemSize(Type type){
+        if(type == Type.RTX3090)
+            return 32;
+        else if(type == Type.RTX2080)
+            return 16;
+        else if(type == Type.GTX1080)
+            return 8;
+        else
+            return 0;
+    }
+
     public boolean canSend(){
         if(getVmemFree()>0 && nextBatch<model.getData().getSize())
             return true;

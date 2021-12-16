@@ -105,10 +105,12 @@ public class MessageBusImpl implements MessageBus {
 		BlockingQueue<Message> MsgQ = this.MSToQHT.get(m);
 		if(MsgQ == null)
 			throw new InterruptedException("Microservice " + m.getName() + " is unregistered");
-		while (MsgQ.isEmpty()){
-			MsgQ.wait();
+		synchronized (MsgQ) {
+			while (MsgQ.isEmpty()) {
+				MsgQ.wait();
+			}
+			return MsgQ.poll();
 		}
-		return MsgQ.poll();
 	}
 
 	@Override

@@ -23,13 +23,11 @@ public class ConferenceService extends MicroService {
     MessageBusImpl messegebus=MessageBusImpl.getInstance();
     public ConferenceService(String name,int date) {
         super("Conference: " + name);
-        // TODO Implement this
-        conInf=new ConfrenceInformation(name,date);////fill information
+        conInf = new ConfrenceInformation(name,date);
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
         MessageBusImpl.getInstance().register(this);
         Callback<PublishResultsEvent>trainEv= e-> {
             this.conInf.addResult(e.getModel());

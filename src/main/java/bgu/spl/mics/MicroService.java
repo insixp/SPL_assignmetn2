@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.messages.TerminateBroadcast;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -24,14 +26,15 @@ public abstract class MicroService implements Runnable {
 
     private boolean terminated = false;
     private final String name;
-    ConcurrentHashMap<Class<? extends Message>, Callback<? extends Message> > CallbackMap = new ConcurrentHashMap<>();
-    MessageBusImpl messegebus=MessageBusImpl.getInstance();
+    ConcurrentHashMap<Class<? extends Message>, Callback<? extends Message>> CallbackMap;
+    MessageBusImpl MsgBus = MessageBusImpl.getInstance();
     /**
      * @param name the micro-service name (used mainly for debugging purposes -
      *             does not have to be unique)
      */
     public MicroService(String name) {
         this.name = name;
+        this.CallbackMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -56,11 +59,8 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
-        //TODO: implement this.
-
-            this.CallbackMap.put(type,callback);
-            messegebus.subscribeEvent(type,this);
-
+            this.CallbackMap.put(type, callback);
+            MsgBus.subscribeEvent(type, this);
     }
 
     /**
@@ -84,9 +84,8 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
-        //TODO: implement this.
             CallbackMap.put(type, callback);
-            messegebus.subscribeBroadcast(type,this);
+            MsgBus.subscribeBroadcast(type,this);
         }
 
 
@@ -102,11 +101,7 @@ public abstract class MicroService implements Runnable {
      *         			micro-service processing this event.
      * 	       			null in case no micro-service has subscribed to {@code e.getClass()}.
      */
-    protected final <T> Future<T> sendEvent(Event<T> e) {
-        //TODO: implement this.
-        Future<T> ans=messegebus.sendEvent(e);
-       return ans;
-    }
+    protected final <T> Future<T> sendEvent(Event<T> e) { return MsgBus.sendEvent(e); }
 
     /**
      * A Micro-Service calls this method in order to send the broadcast message {@code b} using the message-bus
@@ -115,9 +110,7 @@ public abstract class MicroService implements Runnable {
      * @param b The broadcast message to send
      */
     protected final void sendBroadcast(Broadcast b) {
-        //TODO: implement this.
-        messegebus.sendBroadcast(b);
-
+        MsgBus.sendBroadcast(b);
     }
 
     /**
@@ -131,8 +124,7 @@ public abstract class MicroService implements Runnable {
      *               {@code e}.
      */
     protected final <T> void complete(Event<T> e, T result) {
-        //TODO: implement this.
-        messegebus.complete(e,result);
+        MsgBus.complete(e,result);
     }
 
     /**
@@ -144,7 +136,6 @@ public abstract class MicroService implements Runnable {
      * Signals the event loop that it must terminate after handling the current
      * message.
      */
-
     protected final void terminate() {
         this.terminated = true;
     }
@@ -164,16 +155,16 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         initialize();
+        this.subscribeBroadcast(TerminateBroadcast.class, b -> {this.terminate();});
         while (!terminated) {
-            Message mess= null;
+            Message msg = null;
             try {
-                mess = messegebus.awaitMessage(this);
+                msg = MsgBus.awaitMessage(this);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Callback callback= CallbackMap.get(mess.getClass());
-            callback.call(mess);
-            System.out.println("NOT IMPLEMENTED!!!"); //TODO: you should delete this line :)
+            Callback callback = this.CallbackMap.get(msg.getClass());
+            callback.call(msg);
         }
     }
 

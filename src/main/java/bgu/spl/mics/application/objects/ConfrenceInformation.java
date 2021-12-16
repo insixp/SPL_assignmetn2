@@ -24,6 +24,10 @@ public class ConfrenceInformation {///think how to implement
         this.publish=false;
         this.res=new PublishConferenceBroadcast();
     }
+
+
+    public String getName() { return this.name; }
+    public int getDate() { return this.date; }
     public void addResult(Model result){
         this.res.addResult(result);
     }

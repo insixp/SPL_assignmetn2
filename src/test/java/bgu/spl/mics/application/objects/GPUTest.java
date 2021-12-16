@@ -15,7 +15,7 @@ public class GPUTest extends TestCase {
         super.setUp();
         this.cluster = Cluster.getInstance();
         this.cluster.registerCPU(0);
-        this.gpu = new GPU(80, GPU.Type.GTX1080, this.cluster);
+        this.gpu = new GPU(80, GPU.Type.GTX1080, 1000, this.cluster);
         Data data = new Data(Data.Type.Tabular, 23000);
         Student student = new Student("a", "b", Student.Degree.PhD);
         Model model = new Model("Model name", data, student);
@@ -28,11 +28,11 @@ public class GPUTest extends TestCase {
 
     @Test
     public void testGetVmemSize() {
-        this.gpu = new GPU(0, GPU.Type.RTX3090, this.cluster);
+        this.gpu = new GPU(0, GPU.Type.RTX3090, 1000, this.cluster);
         assertEquals(32, this.gpu.getVmemSize());
-        this.gpu = new GPU(0, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(0, GPU.Type.RTX2080, 1000, this.cluster);
         assertEquals(16, this.gpu.getVmemSize());
-        this.gpu = new GPU(0, GPU.Type.GTX1080, this.cluster);
+        this.gpu = new GPU(0, GPU.Type.GTX1080, 1000, this.cluster);
         assertEquals(8, this.gpu.getVmemSize());
     }
 
@@ -93,32 +93,32 @@ public class GPUTest extends TestCase {
         Data d3 = new Data(Data.Type.Text, 9999000);
         Student s1 = new Student("asdasd", "asv vasv", Student.Degree.PhD);
         Student s2 = new Student("asdasd", "asv vasv", Student.Degree.MSc);
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d1, s1));
         assertEquals(this.gpu.getModel().getData(), d1);
         assertEquals(this.gpu.getModel().getStudent(), s1);
         this.gpu.clusterUnregister();
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d2, s1));
         assertEquals(this.gpu.getModel().getData(), d2);
         assertEquals(this.gpu.getModel().getStudent(), s1);
         this.gpu.clusterUnregister();
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d3, s1));
         assertEquals(this.gpu.getModel().getData(), d3);
         assertEquals(this.gpu.getModel().getStudent(), s1);
         this.gpu.clusterUnregister();
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d1, s2));
         assertEquals(this.gpu.getModel().getData(), d1);
         assertEquals(this.gpu.getModel().getStudent(), s2);
         this.gpu.clusterUnregister();
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d2, s2));
         assertEquals(this.gpu.getModel().getData(), d2);
         assertEquals(this.gpu.getModel().getStudent(), s2);
         this.gpu.clusterUnregister();
-        this.gpu = new GPU(8, GPU.Type.RTX2080, this.cluster);
+        this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d3, s2));
         assertEquals(this.gpu.getModel().getData(), d3);
         assertEquals(this.gpu.getModel().getStudent(), s2);

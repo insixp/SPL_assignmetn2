@@ -24,23 +24,16 @@ public class StudentService extends MicroService {
 
     public StudentService(String name, String department, Student.Degree status) {
         super("Student: " + name);
-        this.student=new Student(name, department,status);
-        // TODO Implement this
+        this.student = new Student(name, department,status);
+    }
 
+    public StudentService(Student student) {
+        super("Student: " + student.getName());
+        this.student = student;
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
-
         MessageBusImpl.getInstance().register(this);
-       // Class<Broadcast> e1= new PublishConferenceBroadcast();
-       // this.subscribeBroadcast(e1, (PublishConferenceBroadcast e) ->{implement});
-
-
     }
-
-
-
-
 }

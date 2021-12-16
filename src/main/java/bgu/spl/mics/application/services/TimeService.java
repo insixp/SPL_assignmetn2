@@ -1,6 +1,14 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Broadcast;
+import bgu.spl.mics.Callback;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
+import bgu.spl.mics.application.messages.TickBroadcast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -12,19 +20,50 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-	private  int tickTime;
-	private  int duration;
-	public TimeService(int tickTime,int duration) {
-		super("Time");
-		// TODO Implement this
-		this.tickTime=tickTime;
-		this.duration=duration;
+
+	private MessageBusImpl msgBus;
+	private int tickTime;
+	private int duration;
+	private tickTask tickT;
+
+	private static class tickTask extends TimerTask{
+
+		MessageBusImpl msgBus;
+		private int ticksPassed;
+		private int duration;
+
+		public tickTask(MessageBusImpl msgBus, int duration){
+			this.msgBus = msgBus;
+			this.ticksPassed = 0;
+			this.duration = duration;
+		}
+
+		@Override
+		public void run() {
+			if(this.ticksPassed <= this.duration){
+				this.ticksPassed++;
+				this.msgBus.sendBroadcast(new TickBroadcast(this.ticksPassed));
+			}else {
+				this.msgBus.sendBroadcast(new TerminateBroadcast());
+				this.cancel();
+			}
+		}
+
+		public int getTicksPassed() { return this.ticksPassed; }
+	}
+
+	public TimeService(int tickTime ,int duration) {
+		super("Time service");
+		this.tickTime = tickTime;
+		this.duration = duration;
+		this.msgBus = MessageBusImpl.getInstance();
+		this.tickT = new tickTask(msgBus, this.duration/this.tickTime);
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		msgBus.register(this);
+		Timer timer = new Timer(true);
+		timer.scheduleAtFixedRate(this.tickT, 0, this.tickTime);
 	}
-
 }

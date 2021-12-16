@@ -12,6 +12,7 @@ import bgu.spl.mics.application.objects.Model;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static bgu.spl.mics.application.objects.Model.Status.Tested;
 
@@ -29,116 +30,26 @@ public class GPUService extends MicroService {
     private GPU gpu;
     private TrainModelEvent lastEvent;
     private Queue<TrainModelEvent>TrainModelQ;
-    public GPUService(String name,int gpuId, GPU.Type type, Cluster cluster) {
-        super("Change_This_Name");
-        // TODO Implement this
-        gpu=new GPU( gpuId,type,cluster);
-        lastEvent=null;
-        TrainModelQ= new Queue<TrainModelEvent>() {
-            @Override
-            public boolean add(TrainModelEvent trainModelEvent) {
-                return false;
-            }
+    private MessageBusImpl messegebusIns;
 
-            @Override
-            public boolean offer(TrainModelEvent trainModelEvent) {
-                return false;
-            }
-
-            @Override
-            public TrainModelEvent remove() {
-                return null;
-            }
-
-            @Override
-            public TrainModelEvent poll() {
-                return null;
-            }
-
-            @Override
-            public TrainModelEvent element() {
-                return null;
-            }
-
-            @Override
-            public TrainModelEvent peek() {
-                return null;
-            }
-
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return false;
-            }
-
-            @Override
-            public Iterator<TrainModelEvent> iterator() {
-                return null;
-            }
-
-            @Override
-            public Object[] toArray() {
-                return new Object[0];
-            }
-
-            @Override
-            public <T> T[] toArray(T[] a) {
-                return null;
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                return false;
-            }
-
-            @Override
-            public boolean containsAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public boolean addAll(Collection<? extends TrainModelEvent> c) {
-                return false;
-            }
-
-            @Override
-            public boolean removeAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public boolean retainAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public void clear() {
-
-            }
-        };
+    public GPUService(int gpuId, GPU.Type type, int BATCHSIZE, Cluster cluster) {
+        super("GPU " + gpuId);
+        gpu = new GPU( gpuId,type, BATCHSIZE, cluster);
+        lastEvent = null;
+        TrainModelQ = new LinkedBlockingQueue<>();
+        messegebusIns = MessageBusImpl.getInstance();
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
-        MessageBusImpl messegebusIns=MessageBusImpl.getInstance();
-        messegebusIns.register(this);
+        this.messegebusIns.register(this);
 
         Callback<TrainModelEvent>trainEv=e-> {////trainmodel event callback
             this.TrainModelQ.add(e);
             //this.lastEvent=e;
 
         };
-        Callback<TestModelEvent> testEV= e->{/////test model event callback
+        Callback<TestModelEvent> testEV= e->{ /////test model event callback
             Model.Result r=this.gpu.testModel(e.getModel());
             e.getModel().setResult(r);//updating the result after the testing
             e.getModel().setStatus(Tested);
