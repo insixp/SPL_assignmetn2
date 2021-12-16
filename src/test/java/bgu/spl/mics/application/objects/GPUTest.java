@@ -39,51 +39,26 @@ public class GPUTest extends TestCase {
     @Test
     public void testVmem() {
         assertEquals(0, this.gpu.getVmemOccupied());
-        for(int i = 1; i < this.gpu.getVmemSize(); i++){
-            this.gpu.popNextDataBatch();
-            assertEquals(i, this.gpu.getVmemOccupied());
-        }
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getVmemFree(), 0);
-        DataBatch db = new DataBatch(new Data(Data.Type.Images, 200000), 3000, 2);
+        DataBatch db = new DataBatch(new Data(Data.Type.Images, 200000), 3000, 80);
         this.cluster.sendToGpu(db);
+        assertEquals(0, this.gpu.getBatchProcessed());
         this.gpu.processNextTick();
+        assertEquals(0, this.gpu.getBatchProcessed());
         this.gpu.processNextTick();
+        assertEquals(0, this.gpu.getBatchProcessed());
         this.gpu.processNextTick();
+        assertEquals(0, this.gpu.getBatchProcessed());
         this.gpu.processNextTick();
-        assertEquals(this.gpu.getVmemFree(), 1);
+        assertEquals(0, this.gpu.getBatchProcessed());
+        this.gpu.processNextTick();
+        assertEquals(1000, this.gpu.getBatchProcessed());
     }
 
     @Test
     public void testGetTotalBatch() {
         assertEquals(23, this.gpu.getTotalBatch());
-    }
-
-    @Test
-    public void testGetBatchProcessed() {
-        List<DataBatch> db_list = new ArrayList<DataBatch>();
-        for(int i = 0; i< 13; i++) {
-            this.gpu.popNextDataBatch();
-            db_list.add(this.cluster.readByCpu(0));
-        }
-        for(int i = 0; i < 13; i++){
-            this.cluster.sendToGpu(db_list.get(i));
-        }
-        assertEquals(13, this.gpu.getBatchProcessed());
-    }
-
-    @Test
-    public void testPopNextDataBatch() {
-        for(int i = 0; i < this.gpu.getTotalBatch(); i++) {
-            this.gpu.popNextDataBatch();
-            DataBatch db = this.cluster.readByCpu(0);
-            assertNotNull(db);
-            assertEquals(i*this.gpu.BATCH_SIZE, db.getStartIndex());
-            this.cluster.sendToGpu(db);
-            this.gpu.processNextTick();
-            this.gpu.processNextTick();
-            this.gpu.processNextTick();
-            this.gpu.processNextTick();
-        }
     }
 
     @Test
@@ -127,48 +102,30 @@ public class GPUTest extends TestCase {
 
     @Test
     public void testSetProcessedData() {
-        for(int i = 0; i < this.gpu.getVmemFree(); i++) {
-            this.gpu.popNextDataBatch();
+        this.gpu.processNextTick();
+        for(int i = 0; i < 8; i++) {
             DataBatch db = this.cluster.readByCpu(0);
             assertNotNull(db);
-            assertEquals(db.getStartIndex(), i*this.gpu.BATCH_SIZE);
-            this.cluster.sendToGpu(db);
-            assertEquals(this.gpu.getBatchProcessed(), i);
+            assertEquals(db.getStartIndex(), i * this.gpu.BATCH_SIZE);
         }
     }
 
     @Test
     public void testGetTicksProcessed() {
         assertEquals(this.gpu.getTicksProcessed(), 0);
-        this.gpu.popNextDataBatch();
+        this.gpu.processNextTick();
         DataBatch db = this.cluster.readByCpu(0);
         this.cluster.sendToGpu(db);
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getTicksProcessed(), 0);
-        this.testProcessNextTick();
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getTicksProcessed(), 1);
-        this.testProcessNextTick();
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getTicksProcessed(), 2);
-        this.testProcessNextTick();
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getTicksProcessed(), 3);
-        this.testProcessNextTick();
+        this.gpu.processNextTick();
         assertEquals(this.gpu.getTicksProcessed(), 0);
-    }
-
-    @Test
-    public void testProcessNextTick() {
-        assertEquals(this.gpu.getTicksProcessed(), 0);
-        DataBatch db = this.cluster.readByCpu(0);
-        int free = this.gpu.getVmemFree();
-        this.cluster.sendToGpu(db);
-        assertEquals(this.gpu.getVmemFree(), free);
-        this.gpu.processNextTick();
-        assertEquals(this.gpu.getVmemFree(), free);
-        this.gpu.processNextTick();
-        assertEquals(this.gpu.getVmemFree(), free);
-        this.gpu.processNextTick();
-        assertEquals(this.gpu.getVmemFree(), free);
-        this.gpu.processNextTick();
-        assertEquals(this.gpu.getVmemFree(), free+1);
     }
 
     @Test

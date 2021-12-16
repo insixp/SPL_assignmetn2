@@ -145,13 +145,10 @@ public class GPU {
      *  @POST: this.cluster.messagesByGPU() = @PRE: this.cluster.messagesByGPU() + 1
      **/
     private DataBatch popNextDataBatch() {
-        if(this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()) {
-            DataBatch db = this.getNextDataBatch();
-            incDataBatch();
-            incVmemOccupied();
-            return db;
-        }
-        return null;
+        DataBatch db = this.getNextDataBatch();
+        incDataBatch();
+        incVmemOccupied();
+        return db;
     }
 
     /**
@@ -167,12 +164,14 @@ public class GPU {
      *  @POST: trivial
      **/
     private int getTicksToProcess(){
-        if(this.type == Type.RTX3090)
-            return 1;
-        if(this.type == Type.RTX2080)
-            return 2;
-        if(this.type == Type.GTX1080)
-            return 4;
+        if(!vmem.isEmpty()) {
+            if (this.type == Type.RTX3090)
+                return 1;
+            if (this.type == Type.RTX2080)
+                return 2;
+            if (this.type == Type.GTX1080)
+                return 4;
+        }
         return -1;
     }
 
@@ -236,19 +235,24 @@ public class GPU {
      **/
     public void processNextTick() {
         this.incTick();
-        while (canSend())//sending databatch to cpu if possible
-            cluster.sendToCpu(popNextDataBatch());
-        if (this.getTicksProcessed() == 0) {//if finishes to process the last data batch
-                if(!vmem.isEmpty()) {
-                    vmem.poll();
-                    decVmemOccupied();
-                    this.getModel().getData().incProcessed(1000);///ask chupa
-                    if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize()){
-                        this.model.setStatus(Trained);
-                        updateFuture=true;
-                    }
+        if (this.getTicksProcessed() == 0) {    // if finishes to process the last data batch
+            if(!vmem.isEmpty()) {
+                vmem.poll();
+                decVmemOccupied();
+                this.getModel().getData().incProcessed(this.BATCH_SIZE);    // ask chupa
+                if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize()){
+                    this.model.setStatus(Trained);
+                    updateFuture = true;
                 }
             }
+        }
+        while (canSendToCPU()) {   // sending databatch to cpu if possible
+            if (this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()) {
+                cluster.sendToCpu(popNextDataBatch());
+            }
+        }
+        while(!this.cluster.GpuQIsEmpty(this.gpuId))
+            this.vmem.add(this.cluster.readByGpu(this.gpuId));
     }
 
     /**
@@ -287,7 +291,7 @@ public class GPU {
             return 0;
     }
 
-    public boolean canSend(){
+    public boolean canSendToCPU(){
         if(getVmemFree()>0 && nextBatch<model.getData().getSize())
             return true;
         return false;
