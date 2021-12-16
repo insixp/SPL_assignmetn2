@@ -1,17 +1,14 @@
 package bgu.spl.mics.application.services;
-import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.Callback;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.PublishResultsEvent;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 
 /**
  * Conference service is in charge of
- * aggregating good results and publishing them via the {@link PublishConfrenceBroadcast},
+ * aggregating good results and publishing them via the {@link },
  * after publishing results the conference will unregister from the system.
  * This class may not hold references for objects which it is not responsible for.
  *

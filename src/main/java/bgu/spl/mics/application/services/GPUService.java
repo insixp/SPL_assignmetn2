@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.*;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -69,6 +70,5 @@ public class GPUService extends MicroService {
         this.subscribeEvent(TrainModelEvent.class,trainEv);///////Trainmodel Event
         this.subscribeEvent(TestModelEvent.class,testEV);//////Test Model
         this.subscribeBroadcast(TickBroadcast.class,tickB);
-
     }
 }

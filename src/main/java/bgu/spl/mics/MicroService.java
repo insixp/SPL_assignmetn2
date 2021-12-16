@@ -3,6 +3,7 @@ package bgu.spl.mics;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * The MicroService is an abstract class that any micro-service in the system
@@ -155,7 +156,10 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         initialize();
-        this.subscribeBroadcast(TerminateBroadcast.class, b -> {this.terminate();});
+        this.subscribeBroadcast(TerminateBroadcast.class, b -> {
+            this.terminate();
+        }
+        );
         while (!terminated) {
             Message msg = null;
             try {
