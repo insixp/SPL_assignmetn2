@@ -3,12 +3,8 @@ import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.Callback;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Student;
-import bgu.spl.mics.application.messages.PublishResultsEvent;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},

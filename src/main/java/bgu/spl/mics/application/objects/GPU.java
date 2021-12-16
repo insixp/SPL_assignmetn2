@@ -41,7 +41,7 @@ public class GPU {
 
         //  Vmem
         this.vmemSize = this.typeToVmemSize(this.type);
-        this.vmem = new ArrayBlockingQueue<>(this.getVmemSize());
+        this.vmem = new ArrayBlockingQueue<DataBatch>(this.vmemSize);
         this.vmemOccupied = 0;
 
         //  Initialize
@@ -271,11 +271,11 @@ public class GPU {
     }
 
     public static Type stringToType(String type){
-        if(type == "RTX3090")
+        if(type.toLowerCase().equals("rtx3090"))
             return Type.RTX3090;
-        if(type == "RTX2080")
+        if(type.toLowerCase().equals("rtx2080"))
             return Type.RTX2080;
-        if(type == "GTX1080")
+        if(type.toLowerCase().equals("gtx1080"))
             return Type.GTX1080;
         return null;
     }
@@ -292,7 +292,7 @@ public class GPU {
     }
 
     public boolean canSendToCPU(){
-        if(getVmemFree()>0 && nextBatch<model.getData().getSize())
+        if(this.model != null && getVmemFree() > 0 && nextBatch < model.getData().getSize())
             return true;
         return false;
     }

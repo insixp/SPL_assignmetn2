@@ -53,10 +53,12 @@ public class MessageBusImpl implements MessageBus {
 		if(!BroadcastQ.isEmpty()) {
 			for (MicroService microService : BroadcastQ) {
 				BlockingQueue<Message> MsgQ = MSToQHT.get(microService);
-				MsgQ.add(b);
-				try {
-					MsgQ.notifyAll();
-				} catch (Exception exception) {}
+				synchronized (MsgQ) {
+					MsgQ.add(b);
+					try {
+						MsgQ.notifyAll();
+					} catch (Exception exception) {}
+				}
 			}
 		}
 	}
@@ -70,10 +72,12 @@ public class MessageBusImpl implements MessageBus {
 			BlockingQueue<Message> MsgQ = this.MSToQHT.get(MS);
 			Future<T> future = new Future<>();
 			this.EventToFutureHT.put(e, future);
-			MsgQ.add(e);
-			try {
-				MsgQ.notifyAll();
-			} catch (Exception exception) {}
+			synchronized (MsgQ) {
+				MsgQ.add(e);
+				try {
+					MsgQ.notifyAll();
+				} catch (Exception exception) {}
+			}
 			return future;
 		}
 		return null;
