@@ -24,7 +24,7 @@ public class GPU {
     private Model model;
     private final int gpuId;
     private int nextBatch;
-    private boolean active;
+    public boolean active;
     private int vmemOccupied;
     private int ticks_processed;
     public boolean updateFuture;
@@ -185,6 +185,7 @@ public class GPU {
             this.nextBatch = 0;
             this.active = true;
             this.ticks_processed=0;
+            this.updateFuture=false;
         }
     }
 
@@ -223,21 +224,19 @@ public class GPU {
      **/
     public void processNextTick() {
         this.incTick();
-        if (canSend())//sending one more databatch to cpu if possible
+        while (canSend())//sending databatch to cpu if possible
             cluster.sendToCpu(popNextDataBatch());
         if (this.getTicksProcessed() == 0) {//if finishes to process the last data batch
                 if(!vmem.isEmpty()) {
                     vmem.poll();
                     decVmemOccupied();
-                    updateFuture=true;
-//                    if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize())
-//                        future.complete();
-                }
-                else if(vmemOccupied==0){// if all the databatches of the model finished the process
-                    this.model.setStatus(Trained);
+                    this.getModel().getData().incProcessed(1000);///ask chupa
+                    if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize()){
+                        this.model.setStatus(Trained);
+                        updateFuture=true;
+                    }
                 }
             }
-
     }
     /**
      *  Testing a model.

@@ -4,7 +4,9 @@ import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.Callback;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 
 /**
@@ -18,6 +20,7 @@ import bgu.spl.mics.application.objects.ConfrenceInformation;
  */
 public class ConferenceService extends MicroService {
     ConfrenceInformation conInf;
+    MessageBusImpl messegebus=MessageBusImpl.getInstance();
     public ConferenceService(String name,int date) {
         super("Conference: " + name);
         // TODO Implement this
@@ -28,8 +31,16 @@ public class ConferenceService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         MessageBusImpl.getInstance().register(this);
-        Callback<TickBroadcast> tickBrod= e->{ this.conInf.nextTick();};
+        Callback<PublishResultsEvent>trainEv= e-> {
+            this.conInf.addResult(e.getModel());
+        };
+        Callback<TickBroadcast> tickBrod= e->{
+            this.conInf.proccessNextTick();
+            if(this.conInf.publish) {
+                this.sendBroadcast(this.conInf.getPulishBrod());
+                this.messegebus.unregister(this);
+            }
+        };
         this.subscribeBroadcast(TickBroadcast.class,tickBrod);
-
     }
 }
