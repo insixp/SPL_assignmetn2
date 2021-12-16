@@ -6,6 +6,7 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.CPU;
 /**
@@ -35,8 +36,8 @@ public class CPUService extends MicroService {
     @Override
     protected void initialize() {
         msgBus.register(this);
-        Callback<TerminateBroadcast> terminateBroadcast = (TerminateBroadcast e) -> { this.terminate(); };
-        this.subscribeBroadcast(TerminateBroadcast.class, terminateBroadcast);
+        Callback<TickBroadcast> tickBroadcast = (TickBroadcast e) -> { this.cpu.processNextTick(); };
+        this.subscribeBroadcast(TickBroadcast.class, tickBroadcast);
     }
 
 }

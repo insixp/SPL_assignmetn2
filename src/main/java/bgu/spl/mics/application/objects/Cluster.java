@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Cluster {
 
 	List<Integer> 	gpuCollection;
-	Queue<Integer> 	cpuCollection;
+	ConcurrentLinkedQueue<Integer> 	cpuCollection;
 	ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DataBatch>> toCPUQs;
 	ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DataBatch>> toGPUQs;
 	Statistics		statistics;
@@ -23,7 +23,7 @@ public class Cluster {
 
 	public Cluster(){
 		this.gpuCollection = new LinkedList<>();
-		this.cpuCollection = new LinkedList<>();
+		this.cpuCollection = new ConcurrentLinkedQueue<>();
 		this.toCPUQs = new ConcurrentHashMap<>();
 		this.toGPUQs = new ConcurrentHashMap<>();
 		this.statistics = new Statistics();
@@ -37,7 +37,6 @@ public class Cluster {
 	}
 
 	public static Cluster getInstance() {
-		//TODO: Implement this
 		return SingletonHolder.instance;
 	}
 

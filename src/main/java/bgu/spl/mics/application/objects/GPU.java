@@ -134,7 +134,8 @@ public class GPU {
      *  @POST: trivial
      **/
     private DataBatch getNextDataBatch(){
-        return new DataBatch(this.model.getData(), this.nextBatch, this.gpuId);
+        Data db = new Data(this.model.getData().getType(), this.BATCH_SIZE);
+        return new DataBatch(db, this.nextBatch, this.gpuId);
     }
 
     /**
@@ -247,7 +248,7 @@ public class GPU {
             }
         }
         while (canSendToCPU()) {   // sending databatch to cpu if possible
-            if (this.nextBatch + this.BATCH_SIZE < this.model.getData().getSize()) {
+            if (this.nextBatch + this.BATCH_SIZE <= this.model.getData().getSize()) {
                 cluster.sendToCpu(popNextDataBatch());
             }
         }

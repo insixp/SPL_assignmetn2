@@ -1,8 +1,7 @@
 package bgu.spl.mics.application.objects;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
+import java.util.List;
 
 /**
  * Passive object representing single student.
@@ -19,7 +18,7 @@ public class Student {
     private String name;
     private String department;
     private Degree status;
-    private Collection<Model> models;
+    private List<Model> models;
     private int publications;
     private int papersRead;
 
@@ -37,6 +36,7 @@ public class Student {
     public Degree getStatus(){ return this.status; }
     public int getPublications(){ return this.publications; }
     public int getPapersRead(){ return this.papersRead; }
+    public Model getModel(int index){ return this.models.get(index); }
     public void addModel(Model m){ this.models.add(m); }
     public static Degree stringToDegree(String status){
         if(status.toLowerCase() == "msc")

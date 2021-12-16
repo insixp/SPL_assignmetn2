@@ -57,7 +57,7 @@ public class TimeService extends MicroService{
 		this.tickTime = tickTime;
 		this.duration = duration;
 		this.msgBus = MessageBusImpl.getInstance();
-		this.tickT = new tickTask(msgBus, this.duration/this.tickTime);
+		this.tickT = new tickTask(msgBus, this.duration);
 	}
 
 	@Override

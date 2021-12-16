@@ -18,11 +18,11 @@ public class ConfrenceInformation {///think how to implement
     private PublishConferenceBroadcast res;
     public boolean publish;
     public ConfrenceInformation(String name,int date){
-        this.name=name;
-        this.date=date;
-        this.tick=1;
-        this.publish=false;
-        this.res=new PublishConferenceBroadcast();
+        this.name = name;
+        this.date = date;
+        this.tick = 1;
+        this.publish = false;
+        this.res = new PublishConferenceBroadcast();
     }
 
 
@@ -39,9 +39,9 @@ public class ConfrenceInformation {///think how to implement
     }
     public void proccessNextTick(){
         nextTick();
-      if(tick>=date){
-          publish=true;
-      }
+        if(tick >= date){
+            publish = true;
+        }
     }
 
 }

@@ -1,9 +1,7 @@
 package bgu.spl.mics.application.services;
-import bgu.spl.mics.Broadcast;
-import bgu.spl.mics.Callback;
-import bgu.spl.mics.MessageBusImpl;
-import bgu.spl.mics.MicroService;
+import bgu.spl.mics.*;
 import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
 /**
@@ -31,5 +29,8 @@ public class StudentService extends MicroService {
     @Override
     protected void initialize() {
         MessageBusImpl.getInstance().register(this);
+        Future<Model> f = this.sendEvent(new TrainModelEvent(this.student.getModel(0)));
+        Model m = f.get();
+        System.out.println(m.getStatus());
     }
 }

@@ -50,7 +50,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void sendBroadcast(Broadcast b) {
 		ConcurrentLinkedQueue<MicroService> BroadcastQ = this.MessageToMSHT.get(b.getClass());
-		if(!BroadcastQ.isEmpty()) {
+		if(BroadcastQ != null && !BroadcastQ.isEmpty()) {
 			for (MicroService microService : BroadcastQ) {
 				BlockingQueue<Message> MsgQ = MSToQHT.get(microService);
 				synchronized (MsgQ) {
@@ -67,7 +67,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
 		ConcurrentLinkedQueue<MicroService> MSQ = this.MessageToMSHT.get(e.getClass());
-		if(!MSQ.isEmpty()) {
+		if(MSQ != null && !MSQ.isEmpty()) {
 			MicroService MS = MSQ.poll();
 			BlockingQueue<Message> MsgQ = this.MSToQHT.get(MS);
 			Future<T> future = new Future<>();
