@@ -3,8 +3,8 @@ package bgu.spl.mics.application.messages;
 import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.application.objects.Model;
 
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class PublishConferenceBroadcast implements Broadcast {
     private List<Model> modelList;

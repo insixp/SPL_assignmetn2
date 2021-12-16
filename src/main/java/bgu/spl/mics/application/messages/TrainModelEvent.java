@@ -8,8 +8,9 @@ import bgu.spl.mics.application.objects.Student;
 public class TrainModelEvent implements Event<Model> {
 
     private Model model;
+
     public TrainModelEvent(Model model){
-    this.model=model;
+        this.model = model;
     }
     public Model getModel(){
         return this.model;

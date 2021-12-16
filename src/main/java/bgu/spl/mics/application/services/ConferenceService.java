@@ -17,7 +17,8 @@ import bgu.spl.mics.application.objects.ConfrenceInformation;
  */
 public class ConferenceService extends MicroService {
     ConfrenceInformation conInf;
-    MessageBusImpl messegebus=MessageBusImpl.getInstance();
+    MessageBusImpl messegebus = MessageBusImpl.getInstance();
+
     public ConferenceService(String name,int date) {
         super("Conference: " + name);
         conInf = new ConfrenceInformation(name,date);
@@ -30,11 +31,10 @@ public class ConferenceService extends MicroService {
             this.conInf.addResult(e.getModel());
         };
         Callback<TickBroadcast> tickBrod= e->{
-            this.conInf.proccessNextTick();
-            if(this.conInf.publish) {
-                this.sendBroadcast(this.conInf.getPulishBrod());
+            if(e.getTick() == this.conInf.getDate()){
+                this.sendBroadcast(new PublishConferenceBroadcast());
                 this.messegebus.unregister(this);
-                terminate();
+                this.terminate();
             }
         };
         this.subscribeBroadcast(TickBroadcast.class,tickBrod);

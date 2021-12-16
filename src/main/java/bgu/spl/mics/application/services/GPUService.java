@@ -47,8 +47,6 @@ public class GPUService extends MicroService {
 
         Callback<TrainModelEvent>trainEv=e-> {////trainmodel event callback
             this.TrainModelQ.add(e);
-            //this.lastEvent=e;
-
         };
         Callback<TestModelEvent> testEV= e->{ /////test model event callback
             Model.Result r=this.gpu.testModel(e.getModel());
@@ -58,17 +56,17 @@ public class GPUService extends MicroService {
         };
         Callback<TickBroadcast> tickB= e-> {
             this.gpu.processNextTick();
-            if(!this.gpu.active&!this.TrainModelQ.isEmpty()) {
-                lastEvent=this.TrainModelQ.poll();
+            if(!this.gpu.active & !this.TrainModelQ.isEmpty()) {
+                lastEvent = this.TrainModelQ.poll();
                 this.gpu.setModel(lastEvent.getModel());
             }
             if(this.gpu.updateFuture){
-                this.complete(lastEvent,lastEvent.getModel());//updating the future in the messege bus that the training had finished
+                this.complete(lastEvent, lastEvent.getModel()); //updating the future in the messege bus that the training had finished
                 this.gpu.updateFuture=false;
             }
         };
-        this.subscribeEvent(TrainModelEvent.class,trainEv);///////Trainmodel Event
-        this.subscribeEvent(TestModelEvent.class,testEV);//////Test Model
+        this.subscribeEvent(TrainModelEvent.class,trainEv); ///////Trainmodel Event
+        this.subscribeEvent(TestModelEvent.class,testEV); //////Test Model
         this.subscribeBroadcast(TickBroadcast.class,tickB);
     }
 }

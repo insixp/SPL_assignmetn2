@@ -33,6 +33,7 @@ public class Model {
     public Data getData(){ return this.data; }
     public Student getStudent(){ return this.student; }
     public Result getResult(){ return this.result; }
+    public Status getStatus() { return this.status; }
     public void setResult(Result r){this.result=r;}
     public void setStatus(Status s){this.status=s;}
     public Status getStatus(){return this.status;}

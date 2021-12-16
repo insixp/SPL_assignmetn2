@@ -22,6 +22,12 @@ public class Data {
         this.size = size;
     }
 
+    public Data(Data data){
+        this.type = data.getType();
+        this.processed = data.getProcessed();
+        this.size = data.getSize();
+    }
+
     public Type getType(){ return this.type; }
     public int getProcessed() { return this.processed; }
     public int getSize() { return this.size; }
@@ -35,11 +41,11 @@ public class Data {
         return -1;
     }
     public static Type stringToType(String type){
-        if(type.toLowerCase() == "images")
+        if(type.toLowerCase().equals("images"))
             return Type.Text;
-        if(type.toLowerCase() == "text")
+        if(type.toLowerCase().equals("text"))
             return Type.Text;
-        if(type.toLowerCase() == "tabular")
+        if(type.toLowerCase().equals("tabular"))
             return Type.Tabular;
         return null;
     }

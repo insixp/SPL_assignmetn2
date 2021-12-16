@@ -6,8 +6,6 @@ import bgu.spl.mics.application.messages.TrainModelEvent;
 import junit.framework.TestResult;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 
 /**
@@ -53,6 +51,7 @@ public class Student {
     public Degree getStatus(){ return this.status; }
     public int getPublications(){ return this.publications; }
     public int getPapersRead(){ return this.papersRead; }
+    public Model getModel(int index){ return this.models.get(index); }
     public void addModel(Model m){ this.models.add(m); }
     public static Degree stringToDegree(String status){
         if(status.toLowerCase() == "msc")

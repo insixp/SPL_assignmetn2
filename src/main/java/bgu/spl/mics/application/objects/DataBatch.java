@@ -12,9 +12,15 @@ public class DataBatch {
     private int gpu_id;
 
     public DataBatch(Data data, int start_index, int gpu_id){
-        this.data = data;
+        this.data = new Data(data);
         this.start_index = start_index;
         this.gpu_id = gpu_id;
+    }
+
+    public DataBatch(DataBatch db){
+        this.data = db.getData();
+        this.start_index = db.getStartIndex();
+        this.gpu_id = db.getGpuId();
     }
 
     public int getGpuId(){ return this.gpu_id; }
