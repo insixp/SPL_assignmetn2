@@ -35,4 +35,6 @@ public class Model {
     public Result getResult(){ return this.result; }
     public void setResult(Result r){this.result=r;}
     public void setStatus(Status s){this.status=s;}
+    public Status getStatus(){return this.status;}
+
 }

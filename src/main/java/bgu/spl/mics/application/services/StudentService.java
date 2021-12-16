@@ -21,19 +21,42 @@ import bgu.spl.mics.application.messages.PublishResultsEvent;
  */
 public class StudentService extends MicroService {
     Student student;
-
+    private MessageBusImpl messegebus;
     public StudentService(String name, String department, Student.Degree status) {
         super("Student: " + name);
         this.student = new Student(name, department,status);
+        messegebus=MessageBusImpl.getInstance();
     }
 
     public StudentService(Student student) {
         super("Student: " + student.getName());
         this.student = student;
+        messegebus=MessageBusImpl.getInstance();
     }
 
     @Override
     protected void initialize() {
-        MessageBusImpl.getInstance().register(this);
+        messegebus.register(this);
+
+        Callback<TickBroadcast> tickB= e-> {
+            if(this.student.canTrain())
+                sendEvent(this.student.sendToTrain());
+            if(this.student.canTest()) {
+                sendEvent(this.student.sendToTest());
+                }
+            if(this.student.canPublish){
+                sendEvent(this.student.toPublish());
+            }
+        };
+
+        this.subscribeBroadcast(TickBroadcast.class,tickB);
     }
+
+
+
+
+
+
+
+
 }

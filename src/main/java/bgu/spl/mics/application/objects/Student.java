@@ -1,8 +1,14 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.PublishResultsEvent;
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TrainModelEvent;
+import junit.framework.TestResult;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * Passive object representing single student.
@@ -19,17 +25,22 @@ public class Student {
     private String name;
     private String department;
     private Degree status;
-    private Collection<Model> models;
+    private List<Model> models;
     private int publications;
     private int papersRead;
-
+    private int modelInPross;
+    public  int publish;
+    public boolean canPublish;
     public Student(String name, String department, Degree status){
         this.name = name;
         this.department = department;
-        this.models = new ArrayList<>();
+        this.models = new ArrayList<Model>();
         this.status = status;
         this.publications = 0;
         this.papersRead = 0;
+        this.modelInPross=-1;
+        this.publish=-1;
+        this.canPublish=false;
     }
 
     public String getName(){ return this.name; }
@@ -44,6 +55,32 @@ public class Student {
         if(status.toLowerCase() == "phd")
             return Degree.PhD;
         return null;
+    }
+    public boolean canTest(){
+        if(this.models.get(this.modelInPross).getStatus()== Model.Status.Trained) {
+            return true;
+        }
+        return false;
+    }
+    public boolean canTrain(){
+        if(this.modelInPross==-1||this.models.get(this.modelInPross).getStatus()== Model.Status.Tested) {
+            this.publish=modelInPross;
+            this.canPublish=true;
+            this.modelInPross+=1;
+            if (this.models.size() > this.modelInPross)
+                return true;
+        }
+        return false;
+    }
+    public PublishResultsEvent toPublish(){
+        this.canPublish=false;
+        return new PublishResultsEvent(this.models.get(publish));
+    }
+    public TrainModelEvent sendToTrain(){
+            return new TrainModelEvent(this.models.get(this.modelInPross));
+    }
+    public TestModelEvent sendToTest(){
+            return new TestModelEvent(this.models.get(this.modelInPross));
     }
 
 }

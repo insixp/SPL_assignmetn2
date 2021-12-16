@@ -7,7 +7,7 @@ import bgu.spl.mics.application.objects.Student;
 
 public class TestModelEvent implements Event<Model> {
     private Model model;
-    TestModelEvent(Model model){
+    public TestModelEvent(Model model){
         this.model=model;
     }
     public Model getModel(){
