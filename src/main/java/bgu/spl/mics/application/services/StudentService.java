@@ -4,6 +4,7 @@ import bgu.spl.mics.Callback;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
 /**
@@ -18,9 +19,9 @@ import bgu.spl.mics.application.objects.Student;
 public class StudentService extends MicroService {
     Student student;
     private MessageBusImpl messegebus;
-    public StudentService(String name, String department, Student.Degree status) {
+    public StudentService(String name, String department, Student.Degree status,int id) {
         super("Student: " + name);
-        this.student = new Student(name, department,status);
+        this.student = new Student(name, department,status,id);
         messegebus=MessageBusImpl.getInstance();
     }
 
@@ -35,7 +36,7 @@ public class StudentService extends MicroService {
         messegebus.register(this);
 
         Callback<TickBroadcast> tickB= e-> {
-            if(this.student.canTrain())
+            if(this.student.canAct())
                 sendEvent(this.student.sendToTrain());
             if(this.student.canTest()) {
                 sendEvent(this.student.sendToTest());
@@ -44,8 +45,20 @@ public class StudentService extends MicroService {
                 sendEvent(this.student.toPublish());
             }
         };
+        Callback<PublishConferenceBroadcast> publishB =e->{
+            Model m ;
+            for(int i=0;i<e.getModelList().size();i++){
+                m =e.getModelList().get(i);
+                if(m.getStudent().getId()==this.student.getId())
+                    this.student.incPublications();
+                else
+                    this.student.incPapersRead();
+            }
 
+
+        };
         this.subscribeBroadcast(TickBroadcast.class,tickB);
+        this.subscribeBroadcast(PublishConferenceBroadcast.class,publishB);
     }
 
 

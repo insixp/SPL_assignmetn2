@@ -25,6 +25,7 @@ public class CRMSRunner {
             Cluster cluster = Cluster.getInstance();    //  Activate cluster
             int gpuId = 0;
             int cpuId = 0;
+            int studentID=0;
             final int BATCHSIZE = 1000;
             List<Thread> threadList = new ArrayList<>();
 
@@ -49,7 +50,7 @@ public class CRMSRunner {
                 threadList.add(t);
             }
             for(Setup.sStudent setupStudent : s.Students){ //  Add student microservice.
-                Student student = new Student(setupStudent.name, setupStudent.department, Student.stringToDegree(setupStudent.status));
+                Student student = new Student(setupStudent.name, setupStudent.department, Student.stringToDegree(setupStudent.status),studentID);
                 for(Setup.sModel m : setupStudent.models){
                     student.addModel(new Model(m.name, new Data(Data.stringToType(m.type), m.size), student));
                 }
@@ -57,6 +58,7 @@ public class CRMSRunner {
                 Thread t = new Thread(studentService);
                 t.setName(studentService.getName());
                 threadList.add(t);
+                studentID++;
             }
             //  Tick MicroService
             TimeService timeService = new TimeService(s.TickTime, s.Duration);

@@ -17,7 +17,7 @@ public class GPUTest extends TestCase {
         this.cluster.registerCPU(0);
         this.gpu = new GPU(80, GPU.Type.GTX1080, 1000, this.cluster);
         Data data = new Data(Data.Type.Tabular, 23000);
-        Student student = new Student("a", "b", Student.Degree.PhD);
+        Student student = new Student("a", "b", Student.Degree.PhD,1);
         Model model = new Model("Model name", data, student);
         this.gpu.setModel(model);
     }
@@ -66,8 +66,8 @@ public class GPUTest extends TestCase {
         Data d1 = new Data(Data.Type.Tabular, 250000);
         Data d2 = new Data(Data.Type.Images, 2500000);
         Data d3 = new Data(Data.Type.Text, 9999000);
-        Student s1 = new Student("asdasd", "asv vasv", Student.Degree.PhD);
-        Student s2 = new Student("asdasd", "asv vasv", Student.Degree.MSc);
+        Student s1 = new Student("asdasd", "asv vasv", Student.Degree.PhD,2);
+        Student s2 = new Student("asdasd", "asv vasv", Student.Degree.MSc,3);
         this.gpu = new GPU(8, GPU.Type.RTX2080, 1000, this.cluster);
         this.gpu.setModel(new Model("Name", d1, s1));
         assertEquals(this.gpu.getModel().getData(), d1);

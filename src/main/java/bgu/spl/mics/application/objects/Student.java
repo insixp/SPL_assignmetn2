@@ -26,12 +26,13 @@ public class Student {
     private String department;
     private Degree status;
     private List<Model> models;
+    private int id;
     private int publications;
     private int papersRead;
     private int modelInPross;
     public  int publish;
     public boolean canPublish;
-    public Student(String name, String department, Degree status){
+    public Student(String name, String department, Degree status, int id){
         this.name = name;
         this.department = department;
         this.models = new ArrayList<Model>();
@@ -41,6 +42,10 @@ public class Student {
         this.modelInPross=-1;
         this.publish=-1;
         this.canPublish=false;
+        this.id=id;
+    }
+    public int getId(){
+        return this.id;
     }
 
     public String getName(){ return this.name; }
@@ -62,14 +67,21 @@ public class Student {
         }
         return false;
     }
-    public boolean canTrain(){
-        if(this.modelInPross==-1||this.models.get(this.modelInPross).getStatus()== Model.Status.Tested) {
-            this.publish=modelInPross;
-            this.canPublish=true;
-            this.modelInPross+=1;
-            if (this.models.size() > this.modelInPross)
+    public boolean canAct(){
+       if(this.modelInPross==-1){///FIRST TIME
+           this.modelInPross += 1;
+           if (this.models.size() > this.modelInPross)
                 return true;
         }
+            if (this.models.get(this.modelInPross).getStatus() == Model.Status.Tested) {
+                if (this.models.get(this.modelInPross).getResult() == Model.Result.Good) {
+                    this.publish = modelInPross;
+                    this.canPublish = true;
+                }
+                this.modelInPross += 1;
+                if (this.models.size() > this.modelInPross)
+                    return true;
+            }
         return false;
     }
     public PublishResultsEvent toPublish(){
@@ -82,5 +94,10 @@ public class Student {
     public TestModelEvent sendToTest(){
             return new TestModelEvent(this.models.get(this.modelInPross));
     }
-
+    public void incPublications(){
+        this.publications+=1;
+    }
+    public void incPapersRead(){
+        this.papersRead+=1;
+    }
 }

@@ -26,7 +26,7 @@ public class ConferenceService extends MicroService {
     @Override
     protected void initialize() {
         MessageBusImpl.getInstance().register(this);
-        Callback<PublishResultsEvent>trainEv= e-> {
+        Callback<PublishResultsEvent>ResEv= e-> {
             this.conInf.addResult(e.getModel());
         };
         Callback<TickBroadcast> tickBrod= e->{
@@ -34,8 +34,11 @@ public class ConferenceService extends MicroService {
             if(this.conInf.publish) {
                 this.sendBroadcast(this.conInf.getPulishBrod());
                 this.messegebus.unregister(this);
+                terminate();
             }
         };
         this.subscribeBroadcast(TickBroadcast.class,tickBrod);
+        this.subscribeEvent(PublishResultsEvent.class,ResEv);
+
     }
 }
