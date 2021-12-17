@@ -24,79 +24,61 @@ public class Student {
     private String department;
     private Degree status;
     private List<Model> models;
+    private Model currentWorkingModel;
+    private int modelIndex;
     private int id;
-    private int publications;
-    private int papersRead;
-    private int modelInPross;
-    public  int publish;
-    public boolean canPublish;
+    public int publication;
+    public int papersRead;
+
     public Student(String name, String department, Degree status, int id){
         this.name = name;
         this.department = department;
         this.models = new ArrayList<Model>();
         this.status = status;
-        this.publications = 0;
+        this.id = id;
+        this.currentWorkingModel = null;
+        this.publication = 0;
         this.papersRead = 0;
-        this.modelInPross=-1;
-        this.publish=-1;
-        this.canPublish=false;
-        this.id=id;
+        this.modelIndex = -1;
     }
+
+    //  Getters
     public int getId(){
         return this.id;
     }
-
     public String getName(){ return this.name; }
     public String getDepartment(){ return this.department; }
     public Degree getStatus(){ return this.status; }
-    public int getPublications(){ return this.publications; }
-    public int getPapersRead(){ return this.papersRead; }
-    public Model getModel(int index){ return this.models.get(index); }
+    public Model getModel(int index){
+        if(this.models.size() < index)
+            return null;
+        return this.models.get(index);
+    }
+    public Model getCurrentWorkingModel() { return this.currentWorkingModel; }
+    public int getPublished() { return this.publication; }
+    public int getRead() { return this.papersRead; }
+    public List<Model> getModelList() { return this.models; }
+
+    public void nextModel(){
+        if(this.modelIndex < this.models.size() - 1){
+            this.modelIndex++;
+            this.currentWorkingModel = this.models.get(this.modelIndex);
+        }
+    }
+    public void updateModelStatus(Model.Status status, Model.Result result){
+        this.currentWorkingModel.setStatus(status);
+        this.models.get(this.modelIndex).setStatus(status);
+        this.models.get(this.modelIndex).setResult(result);
+    }
+    public void increasePublished() { this.publication++; }
+    public void increaseRead() { this.papersRead++; }
+    //
     public void addModel(Model m){ this.models.add(m); }
     public static Degree stringToDegree(String status){
-        if(status.toLowerCase() == "msc")
+        if(status.toLowerCase().equals("msc"))
             return Degree.MSc;
-        if(status.toLowerCase() == "phd")
+        if(status.toLowerCase().equals("phd"))
             return Degree.PhD;
         return null;
-    }
-    public boolean canTest(){
-        if(this.models.get(this.modelInPross).getStatus()== Model.Status.Trained) {
-            return true;
-        }
-        return false;
-    }
-    public boolean canAct(){
-       if(this.modelInPross==-1){///FIRST TIME
-           this.modelInPross += 1;
-           if (this.models.size() > this.modelInPross)
-                return true;
-        }
-            if (this.models.get(this.modelInPross).getStatus() == Model.Status.Tested) {
-                if (this.models.get(this.modelInPross).getResult() == Model.Result.Good) {
-                    this.publish = modelInPross;
-                    this.canPublish = true;
-                }
-                this.modelInPross += 1;
-                if (this.models.size() > this.modelInPross)
-                    return true;
-            }
-        return false;
-    }
-    public PublishResultsEvent toPublish(){
-        this.canPublish=false;
-        return new PublishResultsEvent(this.models.get(publish));
-    }
-    public TrainModelEvent sendToTrain(){
-            return new TrainModelEvent(this.models.get(this.modelInPross));
-    }
-    public TestModelEvent sendToTest(){
-            return new TestModelEvent(this.models.get(this.modelInPross));
-    }
-    public void incPublications(){
-        this.publications+=1;
-    }
-    public void incPapersRead(){
-        this.papersRead+=1;
     }
 }

@@ -2,9 +2,7 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Passive object representing information on a conference.
@@ -15,24 +13,26 @@ public class ConfrenceInformation {///think how to implement
     private String name;
     private int date;
     private int tick;
-    private PublishConferenceBroadcast res;
+    private List<Model> modelCollection;
     public boolean publish;
+
     public ConfrenceInformation(String name,int date){
         this.name = name;
         this.date = date;
         this.tick = 1;
         this.publish = false;
-        this.res = new PublishConferenceBroadcast();
+        this.modelCollection = new ArrayList<>();
     }
 
 
     public String getName() { return this.name; }
     public int getDate() { return this.date; }
-    public void addResult(Model result){
-        this.res.addResult(result);
+    public List<Model> getModels() { return this.modelCollection; }
+    public void addResult(Model m){
+        this.modelCollection.add(m);
     }
     public PublishConferenceBroadcast getPulishBrod(){
-        return this.res;
+        return new PublishConferenceBroadcast(this.modelCollection);
     }
     private void nextTick(){
         tick++;

@@ -24,6 +24,8 @@ public class ConferenceService extends MicroService {
         conInf = new ConfrenceInformation(name,date);
     }
 
+    public ConfrenceInformation getConferenceInformation() { return this.conInf; }
+
     @Override
     protected void initialize() {
         MessageBusImpl.getInstance().register(this);
@@ -32,7 +34,7 @@ public class ConferenceService extends MicroService {
         };
         Callback<TickBroadcast> tickBrod= e->{
             if(e.getTick() == this.conInf.getDate()){
-                this.sendBroadcast(new PublishConferenceBroadcast());
+                this.sendBroadcast(this.conInf.getPulishBrod());
                 this.messegebus.unregister(this);
                 this.terminate();
             }

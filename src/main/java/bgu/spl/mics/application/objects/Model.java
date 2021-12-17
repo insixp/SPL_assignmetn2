@@ -8,7 +8,7 @@ package bgu.spl.mics.application.objects;
 public class Model {
 
     public enum Status {
-        PreTrained, Training, Trained, Tested
+        PreTrained, Training, Trained, Tested, Published
     }
 
     public enum Result {
@@ -36,6 +36,5 @@ public class Model {
     public Status getStatus() { return this.status; }
     public void setResult(Result r){this.result=r;}
     public void setStatus(Status s){this.status=s;}
-    public Status getStatus(){return this.status;}
 
 }

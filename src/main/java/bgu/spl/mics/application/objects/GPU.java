@@ -265,9 +265,9 @@ public class GPU {
         Random rnd = new Random();
         int rand = rnd.nextInt(100);
         if(model_in.getStudent().getStatus() == Student.Degree.MSc)
-            return rand<10? Model.Result.Good: Model.Result.Bad;
+            return rand <= 60? Model.Result.Good: Model.Result.Bad;
         if(model_in.getStudent().getStatus() == Student.Degree.PhD)
-            return rand<20? Model.Result.Good: Model.Result.Bad;
+            return rand <= 80? Model.Result.Good: Model.Result.Bad;
         return Model.Result.None;
     }
 

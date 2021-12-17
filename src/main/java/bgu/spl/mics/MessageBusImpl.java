@@ -70,7 +70,7 @@ public class MessageBusImpl implements MessageBus {
 		if(MSQ != null && !MSQ.isEmpty()) {
 			MicroService MS = MSQ.poll();
 			BlockingQueue<Message> MsgQ = this.MSToQHT.get(MS);
-			Future<T> future = new Future<>();
+			Future<T> future = new Future<T>();
 			this.EventToFutureHT.put(e, future);
 			synchronized (MsgQ) {
 				MsgQ.add(e);
