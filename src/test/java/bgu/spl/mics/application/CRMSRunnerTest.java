@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 public class CRMSRunnerTest extends TestCase {
 
     public void testMain() {
-//        CRMSRunner.main(new String[]{"example_input.json"});
+        CRMSRunner.main(new String[]{"example_input.json"});
     }
 
 

@@ -49,9 +49,7 @@ public class CPUTest extends TestCase {
         this.cluster.registerGPU(1);
         Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 1);
-        System.out.println(this.cluster.isCPURegistered(0));
         this.cluster.sendToCpu(db);
-        System.out.println(this.cluster.messagesToCPU(0));
         this.cpu32.processNextTick();
         assertNull(this.cluster.readByGpu(1));
         this.cpu32.processNextTick();
@@ -61,9 +59,7 @@ public class CPUTest extends TestCase {
         this.cpu32.processNextTick();
         assertNull(this.cluster.readByGpu(1));
         this.cpu32.processNextTick();
-        System.out.println(this.cluster.messagesToCPU(0));
         DataBatch processed_db = this.cluster.readByGpu(1);
-        System.out.println(this.cluster.messagesToCPU(0));
         assertNotNull(processed_db);
         assertEquals(db.getGpuId(), processed_db.getGpuId());
         Data processed_Data = processed_db.getData();
