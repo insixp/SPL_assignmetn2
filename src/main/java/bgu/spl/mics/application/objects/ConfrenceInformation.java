@@ -23,8 +23,6 @@ public class ConfrenceInformation {///think how to implement
         this.publish = false;
         this.modelCollection = new ArrayList<>();
     }
-
-
     public String getName() { return this.name; }
     public int getDate() { return this.date; }
     public List<Model> getModels() { return this.modelCollection; }

@@ -88,10 +88,14 @@ public class MessageBusImpl implements MessageBus {
 	public void unregister(MicroService m) {
 		//	First remove Microservice from any messages he's subscribed too.
 		synchronized (Sync) {
-			List<ConcurrentLinkedQueue<MicroService>> MSQ_list = Collections.list(this.MessageToMSHT.elements());
-			for (ConcurrentLinkedQueue<MicroService> MSQ : MSQ_list) {
-				if (MSQ.contains(m))
-					MSQ.remove(m);
+			for(Class<? extends Message> msgClass : Collections.list(this.MessageToMSHT.keys())) {
+				ConcurrentLinkedQueue<MicroService> MSQ = this.MessageToMSHT.get(msgClass);
+				for (MicroService MS : MSQ) {
+					if (MSQ.contains(m))
+						MSQ.remove(m);
+					if (MSQ.isEmpty())
+						this.MessageToMSHT.remove(msgClass);
+				}
 			}
 			this.MSToQHT.remove(m);
 		}

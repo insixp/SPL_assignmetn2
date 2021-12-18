@@ -121,6 +121,8 @@ public class MessageBusTest extends TestCase {
         assertEquals(true, future2.isDone());
         assertEquals(result1, future1.get());
         assertEquals(result2, future2.get());
+        this.msgBus.unregister(testMS);
+        this.msgBus.unregister(testMS2);
     }
 
     public void testIsSubscribed() {

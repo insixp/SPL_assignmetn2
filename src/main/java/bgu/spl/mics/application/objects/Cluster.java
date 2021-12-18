@@ -98,6 +98,7 @@ public class Cluster {
 	public void unregisterCPU(int cpuId){
 		synchronized (cpuCollection) {
 			this.cpuCollection.remove(new Integer(cpuId));
+			this.toCPUQs.remove(cpuId);
 		}
 	}
 	public void registerGPU(int gpuId){
@@ -109,6 +110,7 @@ public class Cluster {
 	public void unregisterGPU(int gpuId){
 		synchronized (gpuCollection) {
 			this.cpuCollection.remove(new Integer(gpuId));
+			this.toGPUQs.remove(gpuId);
 		}
 	}
 	public boolean isCPURegistered(int cpuId){ return this.cpuCollection.contains(new Integer(cpuId)); }
