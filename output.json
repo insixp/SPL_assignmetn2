@@ -54,13 +54,17 @@
       "department": "EE",
       "status": "PhD",
       "publications": 0,
-      "papersRead": 7,
+==== BASE ====
+      "papersRead": 8,
+==== BASE ====
       "models": [
         {
           "name": "VIT",
           "data": {
             "type": "Text",
-            "processed": 54843000,
+==== BASE ====
+            "processed": 54328000,
+==== BASE ====
             "size": 100000000
           },
           "status": "Training",
@@ -72,8 +76,10 @@
       "name": "Pumba",
       "department": "Computer Science",
       "status": "PhD",
-      "publications": 1,
+==== BASE ====
+      "publications": 2,
       "papersRead": 6,
+==== BASE ====
       "models": [
         {
           "name": "Bert",
@@ -93,7 +99,7 @@
             "size": 1000000
           },
           "status": "Published",
-          "result": "Good"
+          "result": "Bad"
         },
         {
           "name": "GPT5",
@@ -122,7 +128,9 @@
       "department": "SE",
       "status": "MSc",
       "publications": 2,
-      "papersRead": 5,
+==== BASE ====
+      "papersRead": 6,
+==== BASE ====
       "models": [
         {
           "name": "Percepetron",
@@ -151,8 +159,10 @@
             "processed": 100000,
             "size": 100000
           },
-          "status": "Published",
-          "result": "Good"
+==== BASE ====
+          "status": "PreTrained",
+          "result": "None"
+==== BASE ====
         },
         {
           "name": "ConditionalGAN",
@@ -170,8 +180,10 @@
       "name": "Nala",
       "department": "Computer Science",
       "status": "PhD",
-      "publications": 0,
-      "papersRead": 7,
+==== BASE ====
+      "publications": 3,
+      "papersRead": 5,
+==== BASE ====
       "models": [
         {
           "name": "YOLO9000",
@@ -180,8 +192,10 @@
             "processed": 0,
             "size": 100000
           },
-          "status": "PreTrained",
-          "result": "None"
+==== BASE ====
+          "status": "Published",
+          "result": "Good"
+==== BASE ====
         },
         {
           "name": "VIT2",
@@ -222,22 +236,7 @@
       "date": 20000,
       "publications": [
         {
-          "name": "GPT4",
-          "data": {
-            "type": "Text",
-            "processed": 1000000,
-            "size": 1000000
-          },
-          "status": "Published",
-          "result": "Good"
-        }
-      ]
-    },
-    {
-      "name": "NeurIPS",
-      "date": 25000,
-      "publications": [
-        {
+==== BASE ====
           "name": "YOLO10",
           "data": {
             "type": "Text",
@@ -248,11 +247,40 @@
           "result": "Good"
         },
         {
-          "name": "DensestNet",
+          "name": "GPT4",
           "data": {
             "type": "Text",
-            "processed": 200000,
-            "size": 200000
+            "processed": 1000000,
+            "size": 1000000
+          },
+          "status": "Published",
+          "result": "Good"
+==== BASE ====
+        }
+      ]
+    },
+    {
+      "name": "NeurIPS",
+      "date": 25000,
+      "publications": [
+        {
+==== BASE ====
+          "name": "YOLO9000",
+          "data": {
+            "type": "Text",
+            "processed": 100000,
+            "size": 100000
+          },
+          "status": "Published",
+          "result": "Good"
+        },
+        {
+          "name": "GPT5",
+==== BASE ====
+          "data": {
+            "type": "Tabular",
+            "processed": 1000000,
+            "size": 1000000
           },
           "status": "Published",
           "result": "Good"
@@ -272,9 +300,10 @@
           },
           "status": "Published",
           "result": "Good"
+==== BASE ====
         },
         {
-          "name": "MoreStyleGAN",
+          "name": "DenserNet",
           "data": {
             "type": "Text",
             "processed": 100000,
@@ -282,6 +311,7 @@
           },
           "status": "Published",
           "result": "Good"
+==== BASE ====
         }
       ]
     },
@@ -290,11 +320,13 @@
       "date": 40000,
       "publications": [
         {
-          "name": "Percepetron",
+==== BASE ====
+          "name": "GNN",
+==== BASE ====
           "data": {
-            "type": "Tabular",
-            "processed": 1000000,
-            "size": 1000000
+            "type": "Text",
+            "processed": 100000,
+            "size": 100000
           },
           "status": "Published",
           "result": "Good"
@@ -318,7 +350,9 @@
       ]
     }
   ],
-  "cpuTime": 184100,
-  "gpuTime": 66246,
-  "batchesProcessed": 59591
+==== BASE ====
+  "cpuTime": 185421,
+  "gpuTime": 68196,
+  "batchesProcessed": 59976
+==== BASE ====
 }
