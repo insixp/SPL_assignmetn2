@@ -61,6 +61,11 @@ public class TimeService extends MicroService{
 	}
 
 	@Override
+	/**
+	 *   the initialization of the service, register it to the Messegebus
+	 *  @PRE: this.messegebusIns.isRegister(this)==false
+	 *  @POST: this.messegebusIns.isRegister(this)==true
+	 **/
 	protected void initialize() {
 		msgBus.register(this);
 		Timer timer = new Timer(true);

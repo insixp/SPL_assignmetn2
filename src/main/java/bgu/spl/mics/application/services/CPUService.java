@@ -32,7 +32,11 @@ public class CPUService extends MicroService {
         this.cpu = cpu;
         msgBus = MessageBusImpl.getInstance();
     }
-
+    /**
+     *   the initialization of the service, register it to the Messegebus, and creates the right callbacks for the service
+     *  @PRE: this.messegebusIns.isRegister(this)==false
+     *  @POST: this.messegebusIns.isRegister(this)==true
+     **/
     @Override
     protected void initialize() {
         msgBus.register(this);

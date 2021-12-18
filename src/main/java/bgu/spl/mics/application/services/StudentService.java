@@ -34,9 +34,16 @@ public class StudentService extends MicroService {
         this.student = student;
         msgBus = MessageBusImpl.getInstance();
     }
-
+    /**
+     *  @PRE: this.student!=null
+     *  @POST: this.student==@pre this.student
+     **/
     public Student getStudent() { return this.student; }
-
+    /**
+     *   the initialization of the service, register it to the Messegebus, and creates the right callbacks for the service
+     *  @PRE: this.messegebusIns.isRegister(this)==false
+     *  @POST: this.messegebusIns.isRegister(this)==true
+     **/
     @Override
     protected void initialize() {
         msgBus.register(this);

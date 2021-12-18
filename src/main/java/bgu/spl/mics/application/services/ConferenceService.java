@@ -23,10 +23,19 @@ public class ConferenceService extends MicroService {
         super("Conference: " + name);
         conInf = new ConfrenceInformation(name,date);
     }
-
+    /**
+     *   the initialization of the service, register it to the Messegebus, and creates the right callbacks for the service
+     *  @PRE: this.conInf!=null
+     *  @POST: this.conInf==@pre this.conInf
+     **/
     public ConfrenceInformation getConferenceInformation() { return this.conInf; }
 
     @Override
+    /**
+     *   the initialization of the service, register it to the Messegebus, and creates the right callbacks for the service
+     *  @PRE: this.messegebusIns.isRegister(this)==false
+     *  @POST: this.messegebusIns.isRegister(this)==true
+     **/
     protected void initialize() {
         MessageBusImpl.getInstance().register(this);
         Callback<PublishResultsEvent>ResEv= e-> {

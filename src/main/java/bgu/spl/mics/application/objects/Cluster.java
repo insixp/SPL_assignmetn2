@@ -108,10 +108,10 @@ public class Cluster {
 		this.gpuCollection.add(new Integer(gpuId));
 	}
 	public void unregisterGPU(int gpuId){
-		synchronized (gpuCollection) {
+		//synchronized (gpuCollection) {
 			this.gpuCollection.remove(new Integer(gpuId));
 			this.toGPUQs.remove(gpuId);
-		}
+		//}
 	}
 	public boolean isCPURegistered(int cpuId){ return this.cpuCollection.contains(new Integer(cpuId)); }
 	public boolean isGPURegistered(int gpuId){ return this.cpuCollection.contains(new Integer(gpuId)); }
