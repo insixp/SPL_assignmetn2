@@ -36,7 +36,9 @@ public class CPUService extends MicroService {
     @Override
     protected void initialize() {
         msgBus.register(this);
-        Callback<TickBroadcast> tickBroadcast = (TickBroadcast e) -> { this.cpu.processNextTick(); };
+        Callback<TickBroadcast> tickBroadcast = (TickBroadcast e) -> {
+            this.cpu.processNextTick();
+        };
         this.subscribeBroadcast(TickBroadcast.class, tickBroadcast);
     }
 

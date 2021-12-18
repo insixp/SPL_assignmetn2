@@ -53,7 +53,7 @@ public class CPU {
      * @pre: none
      * @post: this.active = @pre:this.active
      */
-    public boolean getActive(){ return !this.data_collection.isEmpty(); }
+    public boolean isActive(){ return !this.data_collection.isEmpty(); }
 
     /**
      * Return all data batches in the local collection
@@ -168,6 +168,8 @@ public class CPU {
      */
     public void processNextTick() {
         this.incTick();
+        if(this.isActive())
+            this.cluster.incCpuTime();
         if (this.getTicksProcessed() == 0) {
             if (this.getDataBatchSize() > 0)
                 this.removeProcessedData();

@@ -25,10 +25,10 @@ public class GPU {
     private Model model;
     private final int gpuId;
     private int nextBatch;
-    public boolean active;
+    private boolean active;
     private int vmemOccupied;
     private int ticks_processed;
-    public boolean updateFuture;
+    private boolean updateFuture;
     private Queue<DataBatch> vmem;
 
     public GPU(int gpuId, Type type, int batchSize, Cluster cluster){
@@ -62,6 +62,9 @@ public class GPU {
      */
 
     public int getGpuId() { return this.gpuId; }
+
+    public boolean isActive() { return this.active; }
+    public boolean modelDone() { return this.updateFuture; }
 
     /**
      *  Returns the size of the virtual memory the GPU has.
@@ -183,20 +186,13 @@ public class GPU {
      **/
     public void setModel(Model model) {
         if(!active) {
+            this.active = true;
             this.model = model;
             this.model.setStatus(Training);
             this.nextBatch = 0;
-            this.active = true;
-            this.ticks_processed=0;
-            this.updateFuture=false;
+            this.ticks_processed = 0;
+            this.updateFuture = false;
         }
-    }
-
-    public void sendDataToCPU() throws InterruptedException{
-        DataBatch db = this.popNextDataBatch();
-        if(db == null)
-            throw new InterruptedException("Cannot do this operation");
-        this.cluster.sendToCpu(db);
     }
 
     /**
@@ -236,15 +232,16 @@ public class GPU {
      **/
     public void processNextTick() {
         this.incTick();
-        if (this.getTicksProcessed() == 0) {    // if finishes to process the last data batch
-            if(!vmem.isEmpty()) {
-                vmem.poll();
-                decVmemOccupied();
-                this.getModel().getData().incProcessed(this.BATCH_SIZE);    // ask chupa
-                if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize()){
-                    this.model.setStatus(Trained);
-                    updateFuture = true;
-                }
+        if(this.isActive())
+            this.cluster.incGpuTime();
+        if (!vmem.isEmpty() && this.getTicksProcessed() == 0) {    // if finishes to process the last data batch
+            vmem.poll();
+            decVmemOccupied();
+            this.getModel().getData().incProcessed(this.BATCH_SIZE);
+            if(this.getModel().getData().getProcessed() == this.getModel().getData().getSize()){
+                this.model.setStatus(Trained);
+                this.active = false;
+                updateFuture = true;
             }
         }
         while (canSendToCPU()) {   // sending databatch to cpu if possible
@@ -253,7 +250,7 @@ public class GPU {
             }
         }
         while(!this.cluster.GpuQIsEmpty(this.gpuId))
-            this.vmem.add(this.cluster.readByGpu(this.gpuId));
+            this.getProcessedData();
     }
 
     /**
@@ -293,7 +290,7 @@ public class GPU {
     }
 
     public boolean canSendToCPU(){
-        if(this.model != null && getVmemFree() > 0 && nextBatch < model.getData().getSize())
+        if(this.isActive() && getVmemFree() > 0 && nextBatch < model.getData().getSize())
             return true;
         return false;
     }

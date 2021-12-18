@@ -4,18 +4,18 @@
       "name": "Simba",
       "department": "Computer Science",
       "status": "MSc",
-      "publications": 1,
-      "papersRead": 2,
+      "publications": 0,
+      "papersRead": 6,
       "models": [
         {
           "name": "YOLO10",
           "data": {
             "type": "Text",
-            "processed": 200000,
+            "processed": 0,
             "size": 200000
           },
-          "status": "Tested",
-          "result": "Good"
+          "status": "PreTrained",
+          "result": "None"
         },
         {
           "name": "ResNet9000",
@@ -54,13 +54,13 @@
       "department": "EE",
       "status": "PhD",
       "publications": 0,
-      "papersRead": 3,
+      "papersRead": 6,
       "models": [
         {
           "name": "VIT",
           "data": {
             "type": "Text",
-            "processed": 27480000,
+            "processed": 54285000,
             "size": 100000000
           },
           "status": "Training",
@@ -72,8 +72,8 @@
       "name": "Pumba",
       "department": "Computer Science",
       "status": "PhD",
-      "publications": 1,
-      "papersRead": 2,
+      "publications": 3,
+      "papersRead": 3,
       "models": [
         {
           "name": "Bert",
@@ -82,38 +82,38 @@
             "processed": 1000000,
             "size": 1000000
           },
-          "status": "Tested",
+          "status": "Published",
           "result": "Good"
         },
         {
           "name": "GPT4",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 1000000,
             "size": 1000000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "GPT5",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 200000,
             "size": 200000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Bad"
         },
         {
           "name": "GPT10",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 50000,
             "size": 50000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         }
       ]
     },
@@ -121,18 +121,18 @@
       "name": "Timon",
       "department": "SE",
       "status": "MSc",
-      "publications": 0,
-      "papersRead": 3,
+      "publications": 1,
+      "papersRead": 5,
       "models": [
         {
           "name": "Percepetron",
           "data": {
             "type": "Tabular",
-            "processed": 0,
+            "processed": 1000000,
             "size": 1000000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "GNN",
@@ -170,8 +170,8 @@
       "name": "Nala",
       "department": "Computer Science",
       "status": "PhD",
-      "publications": 1,
-      "papersRead": 2,
+      "publications": 2,
+      "papersRead": 4,
       "models": [
         {
           "name": "YOLO9000",
@@ -180,38 +180,38 @@
             "processed": 100000,
             "size": 100000
           },
-          "status": "Tested",
-          "result": "Good"
+          "status": "Published",
+          "result": "Bad"
         },
         {
           "name": "VIT2",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 1000000,
             "size": 1000000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "MuchMoreEfficientNet",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 20000,
             "size": 20000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Bad"
         },
         {
           "name": "DenserNet",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 100000,
             "size": 100000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         }
       ]
     }
@@ -222,13 +222,23 @@
       "date": 20000,
       "publications": [
         {
-          "name": "YOLO9000",
+          "name": "Bert",
           "data": {
             "type": "Text",
-            "processed": 100000,
-            "size": 100000
+            "processed": 1000000,
+            "size": 1000000
           },
-          "status": "Tested",
+          "status": "Published",
+          "result": "Good"
+        },
+        {
+          "name": "GPT10",
+          "data": {
+            "type": "Text",
+            "processed": 50000,
+            "size": 50000
+          },
+          "status": "Published",
           "result": "Good"
         }
       ]
@@ -236,20 +246,31 @@
     {
       "name": "NeurIPS",
       "date": 25000,
-      "publications": []
+      "publications": [
+        {
+          "name": "VIT2",
+          "data": {
+            "type": "Text",
+            "processed": 1000000,
+            "size": 1000000
+          },
+          "status": "Published",
+          "result": "Good"
+        }
+      ]
     },
     {
       "name": "CVPR",
       "date": 30000,
       "publications": [
         {
-          "name": "YOLO10",
+          "name": "Percepetron",
           "data": {
-            "type": "Text",
-            "processed": 200000,
-            "size": 200000
+            "type": "Tabular",
+            "processed": 1000000,
+            "size": 1000000
           },
-          "status": "Tested",
+          "status": "Published",
           "result": "Good"
         }
       ]
@@ -259,13 +280,13 @@
       "date": 40000,
       "publications": [
         {
-          "name": "Bert",
+          "name": "DenserNet",
           "data": {
             "type": "Text",
-            "processed": 1000000,
-            "size": 1000000
+            "processed": 100000,
+            "size": 100000
           },
-          "status": "Tested",
+          "status": "Published",
           "result": "Good"
         }
       ]
@@ -273,10 +294,21 @@
     {
       "name": "AISTATS",
       "date": 50000,
-      "publications": []
+      "publications": [
+        {
+          "name": "GPT4",
+          "data": {
+            "type": "Text",
+            "processed": 1000000,
+            "size": 1000000
+          },
+          "status": "Published",
+          "result": "Good"
+        }
+      ]
     }
   ],
-  "cpuTime": 0,
-  "gpuTime": 0,
-  "batchesProcessed": 0
+  "cpuTime": 183167,
+  "gpuTime": 63988,
+  "batchesProcessed": 58782
 }

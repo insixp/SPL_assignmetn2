@@ -58,6 +58,7 @@ public class Student {
     public int getPublished() { return this.publication; }
     public int getRead() { return this.papersRead; }
     public List<Model> getModelList() { return this.models; }
+    public int getModelsToProcessLeft() { return this.models.size() - this.modelIndex; }
 
     public void nextModel(){
         if(this.modelIndex < this.models.size() - 1){
@@ -72,6 +73,7 @@ public class Student {
     }
     public void increasePublished() { this.publication++; }
     public void increaseRead() { this.papersRead++; }
+
     //
     public void addModel(Model m){ this.models.add(m); }
     public static Degree stringToDegree(String status){

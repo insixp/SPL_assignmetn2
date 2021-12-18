@@ -65,6 +65,7 @@ public class Statistics {
     }
 
     public long getRecievedGpu(int cpuId){
+        this.totalDataBatches.getAndIncrement();
         return this.gpuIdToGpuStats.get(cpuId).msgRecieved.get();
     }
 

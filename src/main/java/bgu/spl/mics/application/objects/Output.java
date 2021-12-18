@@ -54,9 +54,9 @@ public class Output {
 
     public Collection<oStudent>     studentCollection;
     public Collection<oConference>  conferenceCollection;
-    public int                      cpuTime;
-    public int                      gpuTime;
-    public int                      batchesProcessed;
+    public long                     cpuTime;
+    public long                     gpuTime;
+    public long                     batchesProcessed;
 
     public Output(){
         this.studentCollection = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Output {
 
     public void addStudent(oStudent s) { this.studentCollection.add(s); }
     public void addConference(oConference c) { this.conferenceCollection.add(c); }
-    public void setcpuTime(int t) { this.cpuTime = t; }
-    public void setgpuTime(int t) { this.gpuTime = t; }
-    public void setBatchesProcessed(int b) { this.batchesProcessed = b; }
+    public void setcpuTime(long t) { this.cpuTime = t; }
+    public void setgpuTime(long t) { this.gpuTime = t; }
+    public void setBatchesProcessed(long b) { this.batchesProcessed = b; }
 }

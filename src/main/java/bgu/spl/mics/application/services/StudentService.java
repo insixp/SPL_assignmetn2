@@ -42,27 +42,30 @@ public class StudentService extends MicroService {
         msgBus.register(this);
 
         Callback<TickBroadcast> tickB = (TickBroadcast e)-> {
-            Model currentWorkingModel = this.student.getCurrentWorkingModel();
-            if(currentWorkingModel == null)
-                this.student.nextModel();
-            else {
-                if(currentWorkingModel.getStatus().equals(Model.Status.PreTrained) & !this.active){
-                    workingModelFuture = this.sendEvent(new TrainModelEvent(currentWorkingModel));
-                    this.active = true;
-                }
-                if(currentWorkingModel.getStatus().equals((Model.Status.Trained)) & !this.active) {
-                    workingModelFuture = this.sendEvent(new TestModelEvent(currentWorkingModel));
-                    this.active = true;
-                }
-                if(currentWorkingModel.getStatus().equals((Model.Status.Tested)) & !this.active) {
-                    if(currentWorkingModel.getResult().equals(Model.Result.Good))
-                        workingModelFuture = this.sendEvent(new PublishResultsEvent(currentWorkingModel));
+            if(this.student.getModelsToProcessLeft() > 0) {
+                Model currentWorkingModel = this.student.getCurrentWorkingModel();
+                if (currentWorkingModel == null)
                     this.student.nextModel();
-                    this.active = true;
-                }
-                if(this.workingModelFuture != null && this.workingModelFuture.isDone()) {
-                    this.student.updateModelStatus(this.workingModelFuture.get().getStatus(), this.workingModelFuture.get().getResult());
-                    this.active = false;
+                else {
+                    if (currentWorkingModel.getStatus().equals(Model.Status.PreTrained) & !this.active) {
+                        workingModelFuture = this.sendEvent(new TrainModelEvent(currentWorkingModel));
+                        this.active = true;
+                    }
+                    if (currentWorkingModel.getStatus().equals((Model.Status.Trained)) & !this.active) {
+                        workingModelFuture = this.sendEvent(new TestModelEvent(currentWorkingModel));
+                        this.active = true;
+                    }
+                    if (this.workingModelFuture != null && this.workingModelFuture.isDone()) {
+                        this.student.updateModelStatus(this.workingModelFuture.get().getStatus(), this.workingModelFuture.get().getResult());
+                        this.active = false;
+                    }
+                    if (currentWorkingModel.getStatus().equals((Model.Status.Tested))) {
+                        this.student.updateModelStatus(Model.Status.Published, currentWorkingModel.getResult());
+                        if (currentWorkingModel.getResult().equals(Model.Result.Good))
+                            this.sendEvent(new PublishResultsEvent(currentWorkingModel));
+                        this.student.nextModel();
+                        this.active = false;
+                    }
                 }
             }
         };

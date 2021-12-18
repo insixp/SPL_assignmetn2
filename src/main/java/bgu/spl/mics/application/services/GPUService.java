@@ -29,15 +29,15 @@ import static bgu.spl.mics.application.objects.Model.Status.Tested;
 public class GPUService extends MicroService {
 
     private GPU gpu;
-    private TrainModelEvent lastEvent;
-    private Queue<TrainModelEvent>TrainModelQ;
+    private TrainModelEvent currentEvent;
+    private Queue<TrainModelEvent> eventQ;
     private MessageBusImpl messegebusIns;
 
     public GPUService(int gpuId, GPU.Type type, int BATCHSIZE, Cluster cluster) {
         super("GPU " + gpuId);
         gpu = new GPU( gpuId,type, BATCHSIZE, cluster);
-        lastEvent = null;
-        TrainModelQ = new LinkedBlockingQueue<>();
+        currentEvent = null;
+        eventQ = new LinkedBlockingQueue<>();
         messegebusIns = MessageBusImpl.getInstance();
     }
 
@@ -45,24 +45,24 @@ public class GPUService extends MicroService {
     protected void initialize() {
         this.messegebusIns.register(this);
 
-        Callback<TrainModelEvent>trainEv=e-> {////trainmodel event callback
-            this.TrainModelQ.add(e);
+        Callback<TrainModelEvent>trainEv=e-> { ////trainmodel event callback
+            this.eventQ.add(e);
         };
         Callback<TestModelEvent> testEV= e->{ /////test model event callback
             Model.Result r=this.gpu.testModel(e.getModel());
-            e.getModel().setResult(r);//updating the result after the testing
+            e.getModel().setResult(r); //updating the result after the testing
             e.getModel().setStatus(Tested);
-            this.complete(e,e.getModel());//Updating the future with the result
+            this.complete(e,e.getModel()); //Updating the future with the result
         };
-        Callback<TickBroadcast> tickB= e-> {
+        Callback<TickBroadcast> tickB = e -> {
             this.gpu.processNextTick();
-            if(!this.gpu.active & !this.TrainModelQ.isEmpty()) {
-                lastEvent = this.TrainModelQ.poll();
-                this.gpu.setModel(lastEvent.getModel());
+            if(this.gpu.modelDone() & currentEvent != null){
+                this.complete(currentEvent, currentEvent.getModel()); //updating the future in the messege bus that the training had finished
+                currentEvent = null;
             }
-            if(this.gpu.updateFuture){
-                this.complete(lastEvent, lastEvent.getModel()); //updating the future in the messege bus that the training had finished
-                this.gpu.updateFuture=false;
+            if(!this.gpu.isActive() & !this.eventQ.isEmpty()) {
+                currentEvent = this.eventQ.poll();
+                this.gpu.setModel(currentEvent.getModel());
             }
         };
         this.subscribeEvent(TrainModelEvent.class,trainEv); ///////Trainmodel Event

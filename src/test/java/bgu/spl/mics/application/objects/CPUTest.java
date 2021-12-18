@@ -213,10 +213,10 @@ public class CPUTest extends TestCase {
     public void testGetActive(){
         this.cpu = new CPU(98, 24, BATCH_SIZE, this.cluster);
         this.cluster.registerGPU(3);
-        assertEquals(false, this.cpu.getActive());
+        assertEquals(false, this.cpu.isActive());
         this.cluster.sendToCpu(new DataBatch(new Data(Data.Type.Images, 1000), 5000, 3));
         this.cpu.processNextTick();
-        assertEquals(true, this.cpu.getActive());
+        assertEquals(true, this.cpu.isActive());
     }
 
     public void testGetTicksProcessed() {

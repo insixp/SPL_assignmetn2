@@ -53,6 +53,7 @@ public class Cluster {
 		Integer gpuId = db.getGpuId();
 		ConcurrentLinkedQueue<DataBatch> MsgQ = this.toGPUQs.get(gpuId);
 		MsgQ.add(db);
+		this.statistics.incSentGpu(gpuId);
 	}
 	public boolean CpuQIsEmpty(int cpuId){ return this.toCPUQs.get(cpuId).isEmpty(); }
 
@@ -70,6 +71,7 @@ public class Cluster {
 	}
 	public DataBatch readByGpu(int gpuId){
 		ConcurrentLinkedQueue<DataBatch> GpuQ = this.toGPUQs.get(gpuId);
+		this.statistics.increaseDataBatches();
 		if(GpuQ != null)
 			return GpuQ.poll();
 		return null;
@@ -81,6 +83,9 @@ public class Cluster {
 	public long messagesToGPU(int gpuId) { return this.statistics.getRecievedGpu(gpuId); }
 	public long messagesByCPU(int cpuId) { return this.statistics.getSentCpu(cpuId); }
 	public long messagesToCPU(int cpuId) { return this.statistics.getRecievedCpu((cpuId)); }
+	public void incCpuTime() { this.statistics.increaseCpuTimeunits(); }
+	public void incGpuTime() { this.statistics.increaseGpuTimeunits(); }
+	public Statistics getStatistics() { return this.statistics; }
 
 	//	Register
 	public void registerCPU(int cpuId){

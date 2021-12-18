@@ -1,4 +1,6 @@
 package bgu.spl.mics;
+import bgu.spl.mics.application.messages.TickBroadcast;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
@@ -53,12 +55,7 @@ public class MessageBusImpl implements MessageBus {
 		if(BroadcastQ != null && !BroadcastQ.isEmpty()) {
 			for (MicroService microService : BroadcastQ) {
 				BlockingQueue<Message> MsgQ = MSToQHT.get(microService);
-				synchronized (MsgQ) {
-					MsgQ.add(b);
-					try {
-						MsgQ.notifyAll();
-					} catch (Exception exception) {}
-				}
+				MsgQ.add(b);
 			}
 		}
 	}
@@ -69,15 +66,11 @@ public class MessageBusImpl implements MessageBus {
 		ConcurrentLinkedQueue<MicroService> MSQ = this.MessageToMSHT.get(e.getClass());
 		if(MSQ != null && !MSQ.isEmpty()) {
 			MicroService MS = MSQ.poll();
+			MSQ.add(MS);
 			BlockingQueue<Message> MsgQ = this.MSToQHT.get(MS);
 			Future<T> future = new Future<T>();
 			this.EventToFutureHT.put(e, future);
-			synchronized (MsgQ) {
-				MsgQ.add(e);
-				try {
-					MsgQ.notifyAll();
-				} catch (Exception exception) {}
-			}
+			MsgQ.add(e);
 			return future;
 		}
 		return null;
@@ -109,12 +102,7 @@ public class MessageBusImpl implements MessageBus {
 		BlockingQueue<Message> MsgQ = this.MSToQHT.get(m);
 		if(MsgQ == null)
 			throw new InterruptedException("Microservice " + m.getName() + " is unregistered");
-		synchronized (MsgQ) {
-			while (MsgQ.isEmpty()) {
-				MsgQ.wait();
-			}
-			return MsgQ.poll();
-		}
+		return MsgQ.take();
 	}
 
 	@Override

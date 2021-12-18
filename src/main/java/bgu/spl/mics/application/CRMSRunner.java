@@ -104,6 +104,9 @@ public class CRMSRunner {
                 Output.oConference oconference = new Output.oConference(cfINfo.getName(), cfINfo.getDate(), oModelCollection);
                 outputClass.addConference(oconference);
             }
+            outputClass.setBatchesProcessed(cluster.getStatistics().getTotalDataBatches());
+            outputClass.setcpuTime(cluster.getStatistics().getTotalCpuTime());
+            outputClass.setgpuTime(cluster.getStatistics().getTotalGpuTime());
 
             try(FileWriter writer = new FileWriter("output.json")){
                 Gson gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
