@@ -109,7 +109,7 @@ public class Cluster {
 	}
 	public void unregisterGPU(int gpuId){
 		synchronized (gpuCollection) {
-			this.cpuCollection.remove(new Integer(gpuId));
+			this.gpuCollection.remove(new Integer(gpuId));
 			this.toGPUQs.remove(gpuId);
 		}
 	}

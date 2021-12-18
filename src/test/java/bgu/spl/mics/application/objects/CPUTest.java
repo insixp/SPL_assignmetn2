@@ -32,6 +32,7 @@ public class CPUTest extends TestCase {
         db_collection = this.cpu.getDataBatches();
         assertEquals(1, db_collection.size());
         assertEquals(true, db_collection.contains(db));
+        this.cluster.unregisterGPU(2);
     }
 
     @Test
@@ -58,6 +59,7 @@ public class CPUTest extends TestCase {
         assertEquals(1000, processed_Data.getProcessed());
         assertEquals(data.getSize(), processed_Data.getSize());
         assertEquals(data.getType(), processed_Data.getType());
+        this.cluster.unregisterGPU(2);
     }
 
     @Test
@@ -102,6 +104,9 @@ public class CPUTest extends TestCase {
             DataBatch processedDB = this.cluster.readByGpu(5);
             assertNotNull(processedDB);
         }
+        this.cluster.unregisterGPU(2);
+        this.cluster.unregisterGPU(3);
+        this.cluster.unregisterGPU(5);
     }
 
     @Test
@@ -149,6 +154,9 @@ public class CPUTest extends TestCase {
             else
                 assertNull(processedDB);
         }
+        this.cluster.unregisterGPU(2);
+        this.cluster.unregisterGPU(3);
+        this.cluster.unregisterGPU(5);
     }
 
     @Test
@@ -196,6 +204,9 @@ public class CPUTest extends TestCase {
             else
                 assertNull(processedDB);
         }
+        this.cluster.unregisterGPU(2);
+        this.cluster.unregisterGPU(3);
+        this.cluster.unregisterGPU(5);
     }
 
     public void testGetId() {
@@ -217,6 +228,7 @@ public class CPUTest extends TestCase {
         this.cluster.sendToCpu(new DataBatch(new Data(Data.Type.Images, 1000), 5000, 3));
         this.cpu.processNextTick();
         assertEquals(true, this.cpu.isActive());
+        this.cluster.unregisterGPU(3);
     }
 
     public void testGetTicksProcessed() {
@@ -233,5 +245,6 @@ public class CPUTest extends TestCase {
             this.cpu.processNextTick();
             assertEquals(i%(data.getTicksToProcess()), this.cpu.getTicksProcessed());
         }
+        this.cluster.unregisterGPU(2);
     }
 }
