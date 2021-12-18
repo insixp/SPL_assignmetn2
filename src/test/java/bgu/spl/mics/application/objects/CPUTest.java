@@ -22,7 +22,7 @@ public class CPUTest extends TestCase {
     @Test
     public void testAddGetDataBatch(){
         this.cpu = new CPU(3, 32, BATCH_SIZE, this.cluster);
-        this.cluster.registerGPU(2);
+        this.cluster.registerGPU(7);
         Data data = new Data(Data.Type.Images, 1000);
         DataBatch db = new DataBatch(data, 3000, 2);
         Collection<DataBatch> db_collection = this.cpu.getDataBatches();
@@ -32,7 +32,7 @@ public class CPUTest extends TestCase {
         db_collection = this.cpu.getDataBatches();
         assertEquals(1, db_collection.size());
         assertEquals(true, db_collection.contains(db));
-        this.cluster.unregisterGPU(2);
+        this.cluster.unregisterGPU(7);
     }
 
     @Test

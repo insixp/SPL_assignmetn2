@@ -64,8 +64,8 @@ public class Cluster {
 		synchronized (this.cpuCollection) {
 			cpuId = this.cpuCollection.poll();
 			this.cpuCollection.add(cpuId);
-			dbQ = this.toCPUQs.get(cpuId);
 		}
+		dbQ = this.toCPUQs.get(cpuId);
 		dbQ.add(db);
 		this.statistics.incSentCpu(cpuId);
 	}
