@@ -194,6 +194,7 @@
           },
 ==== BASE ====
           "status": "Published",
+==== BASE ====
           "result": "Good"
 ==== BASE ====
         },
@@ -245,6 +246,7 @@
           },
           "status": "Published",
           "result": "Good"
+==== BASE ====
         },
         {
           "name": "GPT4",
@@ -354,5 +356,5 @@
   "cpuTime": 185421,
   "gpuTime": 68196,
   "batchesProcessed": 59976
-==== BASE ====
 }
+==== BASE ====
