@@ -4,8 +4,8 @@
       "name": "Simba",
       "department": "Computer Science",
       "status": "MSc",
-      "publications": 4,
-      "papersRead": 3,
+      "publications": 2,
+      "papersRead": 7,
       "models": [
         {
           "name": "YOLO10",
@@ -31,21 +31,21 @@
           "name": "LessEfficientNet",
           "data": {
             "type": "Text",
-            "processed": 20000,
+            "processed": 0,
             "size": 20000
           },
-          "status": "Published",
-          "result": "Good"
+          "status": "PreTrained",
+          "result": "None"
         },
         {
           "name": "DensestNet",
           "data": {
             "type": "Text",
-            "processed": 200000,
+            "processed": 0,
             "size": 200000
           },
-          "status": "Published",
-          "result": "Good"
+          "status": "PreTrained",
+          "result": "None"
         }
       ]
     },
@@ -54,17 +54,13 @@
       "department": "EE",
       "status": "PhD",
       "publications": 0,
-==== BASE ====
-      "papersRead": 8,
-==== BASE ====
+      "papersRead": 9,
       "models": [
         {
           "name": "VIT",
           "data": {
             "type": "Text",
-==== BASE ====
-            "processed": 54328000,
-==== BASE ====
+            "processed": 54727000,
             "size": 100000000
           },
           "status": "Training",
@@ -76,10 +72,8 @@
       "name": "Pumba",
       "department": "Computer Science",
       "status": "PhD",
-==== BASE ====
-      "publications": 2,
-      "papersRead": 6,
-==== BASE ====
+      "publications": 1,
+      "papersRead": 8,
       "models": [
         {
           "name": "Bert",
@@ -89,7 +83,7 @@
             "size": 1000000
           },
           "status": "Published",
-          "result": "Bad"
+          "result": "Good"
         },
         {
           "name": "GPT4",
@@ -127,10 +121,8 @@
       "name": "Timon",
       "department": "SE",
       "status": "MSc",
-      "publications": 2,
-==== BASE ====
+      "publications": 3,
       "papersRead": 6,
-==== BASE ====
       "models": [
         {
           "name": "Percepetron",
@@ -140,7 +132,7 @@
             "size": 1000000
           },
           "status": "Published",
-          "result": "Good"
+          "result": "Bad"
         },
         {
           "name": "GNN",
@@ -150,7 +142,7 @@
             "size": 1000000
           },
           "status": "Published",
-          "result": "Bad"
+          "result": "Good"
         },
         {
           "name": "MoreStyleGAN",
@@ -159,20 +151,18 @@
             "processed": 100000,
             "size": 100000
           },
-==== BASE ====
-          "status": "PreTrained",
-          "result": "None"
-==== BASE ====
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "ConditionalGAN",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 500000,
             "size": 500000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         }
       ]
     },
@@ -180,53 +170,48 @@
       "name": "Nala",
       "department": "Computer Science",
       "status": "PhD",
-==== BASE ====
       "publications": 3,
-      "papersRead": 5,
-==== BASE ====
+      "papersRead": 6,
       "models": [
         {
           "name": "YOLO9000",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 100000,
             "size": 100000
           },
-==== BASE ====
           "status": "Published",
-==== BASE ====
-          "result": "Good"
-==== BASE ====
+          "result": "Bad"
         },
         {
           "name": "VIT2",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 1000000,
             "size": 1000000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "MuchMoreEfficientNet",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 20000,
             "size": 20000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         },
         {
           "name": "DenserNet",
           "data": {
             "type": "Text",
-            "processed": 0,
+            "processed": 100000,
             "size": 100000
           },
-          "status": "PreTrained",
-          "result": "None"
+          "status": "Published",
+          "result": "Good"
         }
       ]
     }
@@ -237,8 +222,7 @@
       "date": 20000,
       "publications": [
         {
-==== BASE ====
-          "name": "YOLO10",
+          "name": "ResNet9000",
           "data": {
             "type": "Text",
             "processed": 200000,
@@ -246,18 +230,16 @@
           },
           "status": "Published",
           "result": "Good"
-==== BASE ====
         },
         {
-          "name": "GPT4",
+          "name": "MoreStyleGAN",
           "data": {
             "type": "Text",
-            "processed": 1000000,
-            "size": 1000000
+            "processed": 100000,
+            "size": 100000
           },
           "status": "Published",
           "result": "Good"
-==== BASE ====
         }
       ]
     },
@@ -266,23 +248,21 @@
       "date": 25000,
       "publications": [
         {
-==== BASE ====
-          "name": "YOLO9000",
+          "name": "YOLO10",
           "data": {
             "type": "Text",
-            "processed": 100000,
-            "size": 100000
+            "processed": 200000,
+            "size": 200000
           },
           "status": "Published",
           "result": "Good"
         },
         {
-          "name": "GPT5",
-==== BASE ====
+          "name": "MuchMoreEfficientNet",
           "data": {
-            "type": "Tabular",
-            "processed": 1000000,
-            "size": 1000000
+            "type": "Text",
+            "processed": 20000,
+            "size": 20000
           },
           "status": "Published",
           "result": "Good"
@@ -294,26 +274,24 @@
       "date": 30000,
       "publications": [
         {
-          "name": "ResNet9000",
+          "name": "Bert",
           "data": {
             "type": "Text",
-            "processed": 200000,
-            "size": 200000
+            "processed": 1000000,
+            "size": 1000000
           },
           "status": "Published",
           "result": "Good"
-==== BASE ====
         },
         {
-          "name": "DenserNet",
+          "name": "ConditionalGAN",
           "data": {
             "type": "Text",
-            "processed": 100000,
-            "size": 100000
+            "processed": 500000,
+            "size": 500000
           },
           "status": "Published",
           "result": "Good"
-==== BASE ====
         }
       ]
     },
@@ -322,13 +300,11 @@
       "date": 40000,
       "publications": [
         {
-==== BASE ====
-          "name": "GNN",
-==== BASE ====
+          "name": "VIT2",
           "data": {
             "type": "Text",
-            "processed": 100000,
-            "size": 100000
+            "processed": 1000000,
+            "size": 1000000
           },
           "status": "Published",
           "result": "Good"
@@ -340,11 +316,21 @@
       "date": 50000,
       "publications": [
         {
-          "name": "LessEfficientNet",
+          "name": "GNN",
+          "data": {
+            "type": "Tabular",
+            "processed": 1000000,
+            "size": 1000000
+          },
+          "status": "Published",
+          "result": "Good"
+        },
+        {
+          "name": "DenserNet",
           "data": {
             "type": "Text",
-            "processed": 20000,
-            "size": 20000
+            "processed": 100000,
+            "size": 100000
           },
           "status": "Published",
           "result": "Good"
@@ -352,9 +338,7 @@
       ]
     }
   ],
-==== BASE ====
-  "cpuTime": 185421,
-  "gpuTime": 68196,
-  "batchesProcessed": 59976
+  "cpuTime": 188500,
+  "gpuTime": 70721,
+  "batchesProcessed": 60974
 }
-==== BASE ====

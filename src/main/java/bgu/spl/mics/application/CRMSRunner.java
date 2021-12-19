@@ -20,10 +20,11 @@ import java.util.List;
  * In the end, you should output a text file.
  */
 public class CRMSRunner {
+
     public static void main(String[] args) {
         try {
             Gson gson = new Gson();
-            JsonReader jsReader = new JsonReader(new FileReader("example_input.json"));
+            JsonReader jsReader = new JsonReader(new FileReader(args[0]));
             Setup s = gson.fromJson(jsReader, Setup.class);
             MessageBusImpl msgBus = MessageBusImpl.getInstance();   //  Activate message bus
             Cluster cluster = Cluster.getInstance();    //  Activate cluster
